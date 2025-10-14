@@ -100,6 +100,46 @@
       <button id="next-btn-1" class="btn">Next (Add Door No.)</button>
     </div>
   </div>
+  <!-- STEP 2: Confirm contact & door (hidden by default) -->
+<div id="step2-panel" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <div>
+      <div style="font-size:13px; color:var(--muted);">Confirm delivery details</div>
+      <div style="font-weight:600; font-size:14px; color:#111827;">Add door no, name & mobile</div>
+    </div>
+    <button id="back-to-map" style="background:none;border:none;color:#6b7280; font-weight:600; cursor:pointer;">Back</button>
+  </div>
+
+  <div style="display:grid; gap:10px;">
+    <label style="font-size:13px; color:var(--muted);">Co-ordinates</label>
+    <div id="confirm-coords" class="mono" style="margin-bottom:6px;">-</div>
+
+    <div>
+      <label class="muted" style="display:block;margin-bottom:6px;">Door No (optional)</label>
+      <input id="door-no-input" type="text" placeholder="Eg: 12B, Flat 3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
+    </div>
+
+    <div>
+      <label class="muted" style="display:block;margin-bottom:6px;">Name</label>
+      <input id="name-input" type="text" placeholder="Full name" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
+    </div>
+
+    <div>
+      <label class="muted" style="display:block;margin-bottom:6px;">Mobile</label>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input id="mobile-input" type="tel" placeholder="10 digit mobile" style="flex:1; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
+        <div id="mobile-valid-icon" style="width:28px; height:28px; display:none; align-items:center; justify-content:center; border-radius:8px; background:#ecfdf5; color:#10b981; font-weight:600;">✓</div>
+      </div>
+    </div>
+
+    <div>
+      <label class="muted" style="display:block;margin-bottom:6px;">Full address</label>
+      <div id="full-address-display" style="font-size:14px; color:#111827; line-height:1.3; white-space:pre-wrap; padding:10px; border-radius:8px; border:1px solid #eef2f7; background:#fafafa;">-</div>
+    </div>
+
+    <button id="confirm-btn" class="btn" style="margin-top:6px;">Confirm & Continue</button>
+  </div>
+</div>
 </main>
 
 <!-- Google Maps JS (keep callback initMap) -->
@@ -266,11 +306,97 @@
   /*****************
    *  Navigation: Next button (example behavior)
    *****************/
-  document.getElementById('next-btn-1').addEventListener('click', () => {
-    // Example: console log state. In your app, move to the next step and populate fields.
-    console.log('Proceed with', state);
-    alert('Proceeding — check console for the state object (coords, digipin, address).');
-  });
+ // Step 2 elements
+const step2Panel = document.getElementById('step2-panel');
+const confirmCoords = document.getElementById('confirm-coords');
+const doorNoInput = document.getElementById('door-no-input');
+const nameInput = document.getElementById('name-input');
+const mobileInput = document.getElementById('mobile-input');
+const mobileValidIcon = document.getElementById('mobile-valid-icon');
+const fullAddressDisplay = document.getElementById('full-address-display');
+const confirmBtn = document.getElementById('confirm-btn');
+const backToMap = document.getElementById('back-to-map');
+const nextBtn1 = document.getElementById('next-btn-1');
+
+// Show Step 2 when Next is clicked
+nextBtn1.addEventListener('click', () => {
+  // Ensure coords and address are present
+  if (!state.coords) {
+    alert('Location not ready yet — please wait a moment and try again.');
+    return;
+  }
+
+  // Populate step2 fields
+  confirmCoords.textContent = `${state.coords.lat.toFixed(6)}, ${state.coords.lng.toFixed(6)}`;
+  doorNoInput.value = state.doorNo || '';
+  nameInput.value = state.name || '';
+  mobileInput.value = state.mobile || '';
+  updateFullAddressDisplay();
+
+  // Toggle UI: hide map area and show step2
+  // We'll hide the main map container visually: (the map remains but panel overlays)
+  // If you prefer a full page switch, you can hide the map-wrap; this overlay is simpler.
+  step2Panel.style.display = 'block';
+  // Optional: scroll map out of view to focus on form
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+});
+
+// Back to map
+backToMap.addEventListener('click', () => {
+  step2Panel.style.display = 'none';
+  // focus map search so user can continue
+  document.getElementById('search-input').focus();
+});
+
+// Mobile validation and UI
+mobileInput.addEventListener('input', (e) => {
+  const v = e.target.value.replace(/\D/g,''); // digits only
+  e.target.value = v;
+  state.mobile = v;
+  if (/^\d{10}$/.test(v)) {
+    mobileValidIcon.style.display = 'flex';
+  } else {
+    mobileValidIcon.style.display = 'none';
+  }
+  updateFullAddressDisplay();
+});
+
+// Door and name updates
+doorNoInput.addEventListener('input', (e) => { state.doorNo = e.target.value; updateFullAddressDisplay(); });
+nameInput.addEventListener('input', (e) => { state.name = e.target.value; updateFullAddressDisplay(); });
+
+// Confirm button (proceed to payment or next step)
+confirmBtn.addEventListener('click', () => {
+  // Basic validation: name + 10-digit mobile recommended
+  if (!state.name || state.name.trim().length < 2) {
+    alert('Please enter a valid name.');
+    nameInput.focus();
+    return;
+  }
+  if (!/^\d{10}$/.test(state.mobile)) {
+    alert('Please enter a valid 10-digit mobile number.');
+    mobileInput.focus();
+    return;
+  }
+
+  // Update any final state if needed
+  // For demo, we'll hide step2 and show success toast (you can route to payment)
+  step2Panel.style.display = 'none';
+  alert('Details saved. You can now proceed to payment. (In your app, route to payment step)');
+  console.log('Checkout state:', state);
+});
+
+// Utility: compose full address shown in step 2
+function updateFullAddressDisplay(){
+  let parts = [];
+  if (state.name) parts.push(state.name);
+  if (state.mobile) parts.push(state.mobile);
+  let addr = '';
+  if (state.doorNo) addr += state.doorNo + ', ';
+  addr += (state.geocodedAddress || '');
+  const full = (parts.length ? parts.join('\n') + '\n' : '') + addr;
+  fullAddressDisplay.innerText = full || '-';
+}
 
   /*****************
    *  Expose initMap to global (callback used in Google script)
@@ -281,7 +407,7 @@
 <!-- Load Google Maps JS: replace YOUR_GOOGLE_MAPS_API_KEY with your key.
      Keep &libraries=places so Places Autocomplete works. -->
 <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN3L9gYsZpD2_BYRfElnPbRPVQb6sPufg&libraries=places&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap">
 </script>
 
 </body>
