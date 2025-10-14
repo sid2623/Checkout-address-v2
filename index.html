@@ -3,571 +3,461 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checkout — DIGIPIN + Maps</title>
+  <title>Mobile Checkout — DIGIPIN + Maps</title>
 
-  <!-- Tailwind CDN for quick styling (optional) -->
+  <!-- Tailwind for quick mobile-first styling -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Inter font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-
   <style>
-    :root{
-      --bg: #f7fafc;
-      --card: #ffffff;
-      --muted: #6b7280;
-      --primary: linear-gradient(90deg,#a8e063,#56ab2f);
-      --radius: 14px;
-    }
-    html,body { height:100%; background:var(--bg); font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; }
-    main { max-width:420px; margin:18px auto; background:var(--card); border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(16,24,40,0.08); min-height:88vh; display:flex; flex-direction:column; }
-    header { padding:14px 16px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; gap:10px; }
-    header h1 { margin:0; font-size:15px; font-weight:500; color:#111827; letter-spacing:0.1px; }
-    /* Map area */
-    .map-wrap { position:relative; flex:1 1 auto; min-height:56vh; }
-    #map { position:absolute; inset:0; border-bottom:1px solid #eef2f7; }
-    .search-box { position:absolute; top:12px; left:12px; right:12px; display:flex; gap:8px; z-index:20; }
-    .search-input { flex:1; background:var(--card); border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.06); padding:10px 12px; border:1px solid #e6eef6; font-size:14px; color:#111827; }
-    .search-clear { width:40px; display:flex; align-items:center; justify-content:center; background:var(--card); border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); border:1px solid #e6eef6; font-size:16px; color:var(--muted); }
-    /* Center marker indicator (visual) */
-    .center-indicator { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:10; pointer-events:none; text-align:center; }
-    .center-indicator .pin { font-size:20px; color:#ef4444; transform:translateY(-6px); }
-    .center-indicator .hint { background:#0f172a; color:#fff; font-size:11px; padding:6px 10px; border-radius:10px; margin-bottom:6px; display:inline-block; opacity:0.95; }
-    /* Current location button bottom-right, non-overlapping */
-    .loc-btn { position:absolute; bottom:18px; right:12px; z-index:20; display:flex; align-items:center; gap:8px; background:var(--card); padding:8px 12px; border-radius:999px; box-shadow:0 8px 24px rgba(2,6,23,0.08); border:1px solid #eef2f7; font-size:13px; cursor:pointer; }
-    /* Address card */
-    .address-card { padding:14px; background:var(--card); border-top-left-radius:18px; border-top-right-radius:18px; border-top:1px solid #eef2f7; }
-    .address-row { display:flex; justify-content:space-between; gap:8px; align-items:center; font-size:13px; color: #111827; }
-    .muted { color:var(--muted); font-size:13px; }
-    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-weight:500; font-size:13px; color:#0f172a; }
-    .btn { width:100%; padding:12px 14px; border-radius:12px; border:none; font-weight:600; font-size:15px; cursor:pointer; background:var(--primary); color:white; box-shadow:0 8px 24px rgba(16,185,129,0.12); }
-    /* Responsive small tweaks */
-    @media (max-width:420px){
-      .search-input { font-size:13px; padding:9px 10px; }
-      .loc-btn { font-size:12px; padding:8px 10px; }
-    }
+    /* small local tweaks */
+    html,body,#app { height:100%; }
+    body { background:#f3f4f6; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .phone-frame { max-width:420px; margin:18px auto; border-radius:26px; background:white; box-shadow: 0 18px 30px rgba(0,0,0,0.08); overflow:hidden; border:6px solid #2b132033; }
+    header { padding:18px 16px; text-align:center; font-weight:700; font-size:20px; }
+    .content { padding:12px 16px 28px 16px; min-height:560px; }
+    .card { background:white; border-radius:14px; padding:10px; border:1px solid #e6e7ea; box-shadow:0 2px 0 rgba(0,0,0,0.02); }
+    .search-input { width:100%; height:44px; border-radius:10px; border:1px solid #d6d6d6; padding:8px 12px; background:#fff; }
+    #map { width:100%; height:320px; border-radius:12px; overflow:hidden; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border-radius:12px; font-weight:600; }
+    .primary { background: linear-gradient(90deg,#8ee12c,#56c25e); color:white; }
+    .muted { background:#f3f4f6; color:#222; border:1px solid #e2e2e2; }
+    .field { display:block; width:100%; padding:12px; border-radius:12px; border:1px solid #d0d0d0; background:white; }
+    .small { font-size:13px; color:#666; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #e6e6e6; }
+    .payment-option { display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:12px; border:1px solid #e6e6e6; background:white; margin-bottom:10px; }
+    .error { color:#c62828; font-size:13px; margin-top:6px; }
   </style>
 </head>
 <body>
+  <div id="app" class="phone-frame">
+    <header>Add delivery address</header>
 
-<main>
-  <header>
-    <h1>Add delivery address</h1>
-  </header>
+    <div class="content">
+      <!-- STEP containers -->
+      <div id="step-1" class="step card">
+        <label class="small mb-2 block">Search address</label>
+        <input id="pac-input" class="search-input mb-3" placeholder="Search place or address" type="text" />
 
-    <div id="step1" class="map-wrap">
-    <!-- Search -->
-    <div class="search-box">
-      <input id="search-input" class="search-input" placeholder="Search for area, locality or building" type="text" />
-      <button id="clear-search" class="search-clear" aria-label="clear search">&times;</button>
-    </div>
+        <div id="map" class="mb-3"></div>
 
-    <!-- Map -->
-    <div id="map"></div>
+        <div class="flex items-center gap-2 mb-3">
+          <button id="use-location" class="btn muted w-full">Use Current Location</button>
+        </div>
 
-    <!-- Center indicator -->
-    <div class="center-indicator" aria-hidden="true">
-      <div class="hint">Order will be delivered here</div>
-      <div class="pin">📍</div>
-    </div>
+        <div class="card p-3">
+          <div class="small text-gray-600">DIGIPIN: <span id="digipin" class="font-semibold">—</span></div>
+          <div class="small text-gray-600 mt-2">Co-ords: <span id="coords" class="font-medium">—</span></div>
+          <div class="mt-3 text-sm font-semibold" id="address-text">Address not available</div>
+        </div>
 
-    <!-- Use current location button (bottom-right, non-overlapping) -->
-    <button id="current-location-btn" class="loc-btn" title="Use current device location">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
-      Use current location
-    </button>
-  </div>
-
-  <!-- Address details -->
-  <div class="address-card">
-    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;">
-      <div>
-        <div class="muted">DIGIPIN</div>
-        <div id="digipin-display" class="mono">Fetching...</div>
+        <div class="mt-4">
+          <button id="to-step-2" class="btn primary w-full">Next (Add Door No. & Contact)</button>
+        </div>
       </div>
-      <div style="text-align:right">
-        <div class="muted">Co-ords</div>
-        <div id="coords-display" class="mono">Fetching...</div>
+
+      <div id="step-2" class="step hidden">
+        <div class="mb-3">
+          <label class="small">Co-ordinates</label>
+          <div class="pill mt-1" id="coords-pill">—</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="small">Door No. (optional)</label>
+          <input id="door" class="field mt-1" placeholder="Flat / Door / Building name (optional)" />
+        </div>
+
+        <div class="mb-3">
+          <label class="small">Name</label>
+          <input id="name" class="field mt-1" placeholder="Full name" />
+        </div>
+
+        <div class="mb-3">
+          <label class="small">Mobile</label>
+          <input id="mobile" class="field mt-1" placeholder="10 digit mobile" inputmode="numeric" />
+          <div id="mobile-error" class="error hidden">Enter a valid 10 digit mobile number.</div>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="back-to-1" class="btn muted w-1/2">Back</button>
+          <button id="to-step-3" class="btn primary w-1/2">Continue</button>
+        </div>
       </div>
-    </div>
 
-    <div style="margin-top:10px;">
-      <div class="muted">Address</div>
-      <div id="address-display" style="margin-top:4px; font-size:14px; color:#111827; line-height:1.35;">Fetching address...</div>
-    </div>
+      <div id="step-3" class="step hidden">
+        <div class="mb-3">
+          <h3 class="text-lg font-bold">Order Details</h3>
+          <div class="card mt-2 p-3">
+            <div class="flex items-center gap-3">
+              <div style="width:54px;height:54px;border-radius:8px;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-weight:700;">IMG</div>
+              <div>
+                <div class="font-semibold">Slides</div>
+                <div class="small text-gray-500">Size: 9UK, Black</div>
+              </div>
+              <div class="ml-auto font-semibold text-red-600">Rs. 999.00</div>
+            </div>
+          </div>
+        </div>
 
-    <div style="margin-top:12px;">
-      <button id="next-btn-1" class="btn">Next (Add Door No.)</button>
-    </div>
-  </div>
-  <!-- STEP 2: Confirm contact & door (hidden by default) -->
-<div id="step2" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <div>
-      <div style="font-size:13px; color:var(--muted);">Confirm delivery details</div>
-      <div style="font-weight:600; font-size:14px; color:#111827;">Add door no, name & mobile</div>
-    </div>
-    <button id="back-to-map" style="background:none;border:none;color:#6b7280; font-weight:600; cursor:pointer;">Back</button>
-  </div>
+        <div class="mb-3">
+          <h3 class="text-lg font-bold">Delivery</h3>
+          <div class="card mt-2 p-3">
+            <div class="small text-gray-600">Name</div>
+            <div class="font-medium" id="review-name">—</div>
+            <div class="small text-gray-600 mt-2">Mobile</div>
+            <div class="font-medium" id="review-mobile">—</div>
+            <div class="small text-gray-600 mt-2">Address</div>
+            <div class="font-medium" id="review-address">—</div>
+            <div class="small text-gray-600 mt-2">Co-ords & DIGIPIN</div>
+            <div class="font-medium" id="review-coords-digipin">—</div>
+          </div>
+        </div>
 
-  <div style="display:grid; gap:10px;">
-    <label style="font-size:13px; color:var(--muted);">Co-ordinates</label>
-    <div id="confirm-coords" class="mono" style="margin-bottom:6px;">-</div>
+        <div class="mb-3">
+          <h3 class="text-lg font-bold mb-2">Payment Options</h3>
+          <div id="payments">
+            <label class="payment-option">
+              <div>
+                <div class="font-semibold">Debit on Delivery</div>
+                <div class="small">One-time UPI mandate; amount debited after delivery</div>
+              </div>
+              <div>Rs. 899</div>
+              <input name="payment" type="radio" value="dod" class="ml-3" />
+            </label>
 
-    <div>
-      <label class="muted" style="display:block;margin-bottom:6px;">Door No (optional)</label>
-      <input id="door-no-input" type="text" placeholder="Eg: 12B, Flat 3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
-    </div>
+            <label class="payment-option">
+              <div>
+                <div class="font-semibold">UPI</div>
+              </div>
+              <div>Rs. 999</div>
+              <input name="payment" type="radio" value="upi" />
+            </label>
 
-    <div>
-      <label class="muted" style="display:block;margin-bottom:6px;">Name</label>
-      <input id="name-input" type="text" placeholder="Full name" style="width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
-    </div>
+            <label class="payment-option">
+              <div>
+                <div class="font-semibold">Cards</div>
+              </div>
+              <div>Rs. 999</div>
+              <input name="payment" type="radio" value="card" />
+            </label>
 
-    <div>
-      <label class="muted" style="display:block;margin-bottom:6px;">Mobile</label>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <input id="mobile-input" type="tel" placeholder="10 digit mobile" style="flex:1; padding:10px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;">
-        <div id="mobile-valid-icon" style="width:28px; height:28px; display:none; align-items:center; justify-content:center; border-radius:8px; background:#ecfdf5; color:#10b981; font-weight:600;">✓</div>
+            <label class="payment-option">
+              <div>
+                <div class="font-semibold">Cash on Delivery (COD)</div>
+                <div class="small">+ Rs.199 surcharge</div>
+              </div>
+              <div class="text-red-600">Rs. 1198</div>
+              <input name="payment" type="radio" value="cod" />
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="back-to-2" class="btn muted w-1/2">Back</button>
+          <button id="pay-now" class="btn primary w-1/2">Pay Now</button>
+        </div>
       </div>
-    </div>
 
-    <div>
-      <label class="muted" style="display:block;margin-bottom:6px;">Full address</label>
-      <div id="full-address-display" style="font-size:14px; color:#111827; line-height:1.3; white-space:pre-wrap; padding:10px; border-radius:8px; border:1px solid #eef2f7; background:#fafafa;">-</div>
-    </div>
-
-    <button id="confirm-btn" class="btn" style="margin-top:6px;">Confirm & Continue</button>
-  </div>
-</div>
-<!-- STEP 3: Payment -->
-<!-- STEP 3: Payment (separate page) -->
-<div id="step3" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <div>
-      <div class="muted">Order Details</div>
-      <div style="font-weight:700;font-size:14px;color:#111827;">Slides — Size: 9UK, Black</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="muted">Qty: <span id="qty">1</span></div>
-      <div id="item-price" style="font-weight:700;">Rs. 999.00</div>
-    </div>
-  </div>
-
-  <h3 style="text-align:center;font-weight:600;margin-bottom:10px;">Payment Options</h3>
-
-  <div id="payment-options">
-    <div class="option selected" data-id="dod" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-weight:700;">Debit on Delivery</div>
-        <div class="small-muted">One-time UPI mandate, charged only after delivery</div>
+      <div id="success" class="hidden text-center">
+        <div style="padding:26px;">
+          <div style="width:78px;height:78px;border-radius:999px;background:#eaf9ee;margin:12px auto;display:flex;align-items:center;justify-content:center;font-size:28px;color:#2a7f35;">✓</div>
+          <h2 class="font-bold text-xl">Order Confirmed</h2>
+          <p class="mt-2 text-sm text-gray-600">Your order has been placed successfully. Delivery partner will contact you.</p>
+          <div class="mt-6">
+            <button id="start-over" class="btn primary">Place New Order</button>
+          </div>
+        </div>
       </div>
-      <div style="text-align:right;">
-        <div style="color:#10b981;font-weight:700;">Rs. 899.00</div>
-        <div class="small-muted">Save ₹100</div>
-      </div>
-    </div>
 
-    <div class="option" data-id="upi" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-weight:700;">UPI</span><span>Rs. 999.00</span>
-    </div>
+    </div> <!-- content -->
+  </div> <!-- frame -->
 
-    <div class="option" data-id="card" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-weight:700;">Cards</span><span>Rs. 999.00</span>
-    </div>
+  <!-- Google Maps JS will be loaded dynamically below.
+       Replace YOUR_GOOGLE_MAPS_API_KEY with an actual key that has Maps, Places, Geocoding enabled.
+  -->
+  <script>
+    // --- Utilities / state ---
+    let map, marker, geocoder, autocomplete;
+    const state = {
+      lat: null, lon: null, address: '', digipin: '', door:'', name:'', mobile:''
+    };
 
-    <div class="option" data-id="netbank" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-weight:700;">Netbanking</span><span>Rs. 999.00</span>
-    </div>
+    // DIGIPIN encoding - adapted/fixed version of your provided function.
+    function Get_DIGIPIN(lat, lon) {
+      // L grid
+      const L = [
+        ['F', 'C', '9', '8'],
+        ['J', '3', '2', '7'],
+        ['K', '4', '5', '6'],
+        ['L', 'M', 'P', 'T']
+      ];
 
-    <div class="option" data-id="cod" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-weight:700;">COD <span style="font-weight:400;color:#6b7280;">+ ₹199 surcharge</span></span><span style="color:#ef4444;">Rs. 1199.00</span>
-    </div>
-  </div>
+      let vDIGIPIN = '';
+      let row = 0, column = 0;
 
-  <div style="margin-top:12px;">
-    <button id="pay-now-btn" class="btn">Pay Now →</button>
-  </div>
+      // Bounding Box Extent (as in your original)
+      let MinLat = 2.5, MaxLat = 38.50, MinLon = 63.50, MaxLon = 99.50;
+      let LatDivBy = 4, LonDivBy = 4;
 
-  <div style="margin-top:10px;">
-    <button id="back-to-step2" style="background:none;border:none;color:#6b7280;font-weight:600;cursor:pointer;margin-top:8px;">Back to Address</button>
-  </div>
-</div>
+      if (lat < MinLat || lat > MaxLat || lon < MinLon || lon > MaxLon) {
+        // fallback: return a simplified code derived from lat/lon if out of range
+        const fixedLat = Math.abs(lat).toString().replace('.', '').slice(0,5);
+        const fixedLon = Math.abs(lon).toString().replace('.', '').slice(0,5);
+        return `${fixedLat}-${fixedLon}`;
+      }
 
-<!-- STEP 4: Success (separate page) -->
-<div id="step4" style="display:none;text-align:center;padding:20px;">
-  <div style="font-size:40px;color:#10b981;margin-bottom:6px;">✓</div>
-  <div style="font-weight:700;font-size:20px;margin-bottom:6px;">Payment Successful!</div>
-  <div class="small-muted" style="margin-bottom:12px;">Your order has been placed.</div>
+      for (let Lvl = 1; Lvl <= 10; Lvl++) {
+        const LatDivDeg = (MaxLat - MinLat) / LatDivBy;
+        const LonDivDeg = (MaxLon - MinLon) / LonDivBy;
 
-  <!-- If you want to show the mockup image here, you can insert an <img> tag -->
-  <!-- <img src="your-mockup.jpg" alt="mockup" style="max-width:320px;border-radius:12px;"> -->
+        // find row
+        let NextLvlMaxLat = MaxLat;
+        let NextLvlMinLat = MaxLat - LatDivDeg;
+        row = 0;
+        for (let x = 0; x < LatDivBy; x++) {
+          if (lat >= NextLvlMinLat && lat < NextLvlMaxLat) {
+            row = x;
+            break;
+          } else {
+            NextLvlMaxLat = NextLvlMinLat;
+            NextLvlMinLat = NextLvlMaxLat - LatDivDeg;
+          }
+        }
 
-  <div style="margin-top:12px;">
-    <button id="start-again-btn" class="btn">Place Another Order</button>
-  </div>
-</div>
+        // find column
+        let NextLvlMinLon = MinLon;
+        let NextLvlMaxLon = MinLon + LonDivDeg;
+        column = 0;
+        for (let x = 0; x < LonDivBy; x++) {
+          if (lon >= NextLvlMinLon && lon < NextLvlMaxLon) {
+            column = x;
+            break;
+          } else if ((NextLvlMinLon + LonDivDeg) < MaxLon) {
+            NextLvlMinLon = NextLvlMaxLon;
+            NextLvlMaxLon = NextLvlMinLon + LonDivDeg;
+          } else {
+            column = x;
+          }
+        }
 
-</main>
+        vDIGIPIN += L[row][column];
 
-<!-- Google Maps JS (keep callback initMap) -->
-<script>
-  /*****************
-   *  STATE
-   *****************/
-  const state = {
-    coords: null,
-    digipin: null,
-    geocodedAddress: null
-  };
+        if (Lvl === 3 || Lvl === 6) vDIGIPIN += "-";
 
-  /*****************
-   *  DIGIPIN generation (your function, slightly cleaned)
-   *****************/
-  function getDigipin(lat, lon){
-    const L = [
-      ['F','C','9','8'], ['J','3','2','7'],
-      ['K','4','5','6'], ['L','M','P','T']
-    ];
-    let vDIGIPIN = '';
-    let row = 0, column = 0;
-    let minLat = 2.5, maxLat = 38.5;
-    let minLon = 63.5, maxLon = 99.5;
-    const latDivBy = 4, lonDivBy = 4;
-
-    if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) {
-      return 'Out of Range';
+        // narrow bounding box for next level
+        MinLat = NextLvlMinLat;
+        MaxLat = NextLvlMaxLat;
+        MinLon = NextLvlMinLon;
+        MaxLon = NextLvlMaxLon;
+      }
+      return vDIGIPIN;
     }
 
-    for (let lvl = 1; lvl <= 10; lvl++){
-      const latDivDeg = (maxLat - minLat) / latDivBy;
-      const lonDivDeg = (maxLon - minLon) / lonDivBy;
-
-      for (let i=0;i<latDivBy;i++){
-        if (lat >= maxLat - (i+1)*latDivDeg && lat < maxLat - i*latDivDeg) { row = i; break; }
-      }
-      for (let i=0;i<lonDivBy;i++){
-        if (lon >= minLon + i*lonDivDeg && lon < minLon + (i+1)*lonDivDeg) { column = i; break; }
-      }
-
-      vDIGIPIN += L[row][column];
-
-      if (lvl === 3 || lvl === 6) vDIGIPIN += '-';
-
-      maxLat = maxLat - row * latDivDeg;
-      minLat = maxLat - latDivDeg;
-      minLon = minLon + column * lonDivDeg;
-      maxLon = minLon + lonDivDeg;
+    // Helper to update UI values
+    function updateUI() {
+      document.getElementById('digipin').innerText = state.digipin || '—';
+      document.getElementById('coords').innerText = (state.lat && state.lon) ? `${state.lat.toFixed(7)}, ${state.lon.toFixed(7)}` : '—';
+      document.getElementById('coords-pill').innerText = (state.lat && state.lon) ? `${state.lat.toFixed(7)}, ${state.lon.toFixed(7)}` : '—';
+      document.getElementById('address-text').innerText = state.address || 'Address not available';
     }
-    return vDIGIPIN;
-  }
 
-  /*****************
-   *  Map, Places, Geocoder (client)
-   *****************/
-  let map, geocoder, autocomplete;
-  const defaultPosition = { lat: 17.3850, lng: 78.4867 }; // Hyderabad
-
-  function initMap(){
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: defaultPosition,
-      zoom: 15,
-      disableDefaultUI: true,
-      gestureHandling: 'greedy'
-    });
-
-    geocoder = new google.maps.Geocoder();
-
-    setupSearchAutocomplete();
-    // Update details initially
-    updateLocationDetails(map.getCenter());
-
-    // When map center changes (pan/zoom), update after a tiny throttle
-    let t;
-    map.addListener('center_changed', () => {
-      clearTimeout(t);
-      t = setTimeout(() => { updateLocationDetails(map.getCenter()); }, 200);
-    });
-  }
-
-  // --- Places Autocomplete using the Maps JS library (client-side) ---
-  function setupSearchAutocomplete(){
-    const input = document.getElementById('search-input');
-    autocomplete = new google.maps.places.Autocomplete(input, { fields: ['geometry','formatted_address','name'] });
-    autocomplete.bindTo('bounds', map);
-
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (place.geometry && place.geometry.location){
-        map.panTo(place.geometry.location);
-        map.setZoom(17);
-        // updateLocationDetails will run from center_changed listener
-      }
-    });
-
-    document.getElementById('clear-search').addEventListener('click', () => {
-      input.value = '';
-    });
-  }
-
-  // --- Update UI after obtaining coordinates ---
-  function updateLocationDetails(latLng){
-    // latLng may be a LatLng object or a plain object
-    const lat = (typeof latLng.lat === 'function') ? latLng.lat() : latLng.lat;
-    const lng = (typeof latLng.lng === 'function') ? latLng.lng() : latLng.lng;
-
-    state.coords = { lat, lng };
-    document.getElementById('coords-display').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    document.getElementById('digipin-display').textContent = 'Generating...';
-    document.getElementById('address-display').textContent = 'Fetching address...';
-
-    // DIGIPIN
-    state.digipin = getDigipin(lat, lng);
-    document.getElementById('digipin-display').textContent = state.digipin;
-
-    // Client-side reverse geocode (fast, uses the Maps JS geocoder)
-    reverseGeocodeClient(lat, lng).then(address => {
-      state.geocodedAddress = address || 'No address found';
-      document.getElementById('address-display').textContent = state.geocodedAddress;
-    }).catch(err => {
-      state.geocodedAddress = 'Address unavailable';
-      document.getElementById('address-display').textContent = state.geocodedAddress;
-      console.error('Reverse geocode error (client):', err);
-    });
-  }
-
-  // Client-side geocoder using the Maps JS geocoder (no REST call)
-  function reverseGeocodeClient(lat, lng){
-    return new Promise((resolve, reject) => {
-      if (!geocoder) return reject('Geocoder not initialized');
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+    // Reverse geocode by lat/lng
+    function reverseGeocode(lat, lon) {
+      if (!geocoder) return;
+      const latlng = { lat: parseFloat(lat), lng: parseFloat(lon) };
+      geocoder.geocode({ location: latlng }, function(results, status) {
         if (status === 'OK' && results[0]) {
-          resolve(results[0].formatted_address);
-        } else if (status === 'OK') {
-          resolve(null);
+          state.address = results[0].formatted_address;
+          state.digipin = Get_DIGIPIN(lat, lon);
+          updateUI();
         } else {
-          reject(status);
+          state.address = `Lat ${lat.toFixed(6)}, Lon ${lon.toFixed(6)}`;
+          state.digipin = Get_DIGIPIN(lat, lon);
+          updateUI();
+          console.warn('Geocoder failed: ', status);
         }
       });
-    });
-  }
-
-  /*****************
-   *  Current location button
-   *  (keeps UI non-overlapping)
-   *****************/
-  document.getElementById('current-location-btn').addEventListener('click', () => {
-    if (!navigator.geolocation) {
-      alert("Location not supported by your browser.");
-      return;
     }
-    navigator.geolocation.getCurrentPosition(pos => {
-      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      map.panTo(p);
-      map.setZoom(17);
-    }, err => {
-      console.error(err);
-      alert('Unable to retrieve your location.');
-    }, { enableHighAccuracy: true, timeout: 8000 });
-  });
 
-  /*****************
-   *  Navigation: Next button (example behavior)
-   *****************/
- // Step 2 elements
-// Step 2 elements
-const confirmCoords = document.getElementById('confirm-coords');
-const doorNoInput = document.getElementById('door-no-input');
-const nameInput = document.getElementById('name-input');
-const mobileInput = document.getElementById('mobile-input');
-const mobileValidIcon = document.getElementById('mobile-valid-icon');
-const fullAddressDisplay = document.getElementById('full-address-display');
-const confirmBtn = document.getElementById('confirm-btn');
-const backToMap = document.getElementById('back-to-map');
-const nextBtn1 = document.getElementById('next-btn-1');
+    // Initialize map and autocomplete
+    function initMap() {
+      const defaultCenter = { lat: 17.50383899, lng: 78.40651236 }; // Hyderabad-ish default
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: defaultCenter,
+        zoom: 15,
+        disableDefaultUI: true,
+        gestureHandling: 'greedy'
+      });
 
-const step1 = document.getElementById('step1');
-const step2 = document.getElementById('step2');
-const step3 = document.getElementById('step3');
-const step4 = document.getElementById('step4');
+      geocoder = new google.maps.Geocoder();
 
+      marker = new google.maps.Marker({
+        position: defaultCenter,
+        map,
+        draggable: true,
+        title: 'Drop pin where delivery should happen'
+      });
 
-// Show Step 2 when Next clicked (hide step1)
-nextBtn1.addEventListener('click', () => {
-  if (!state.coords) {
-    alert('Location not ready yet — please wait a moment and try again.');
-    return;
-  }
-  // populate values into step2
-  confirmCoords.textContent = `${state.coords.lat.toFixed(6)}, ${state.coords.lng.toFixed(6)}`;
-  doorNoInput.value = state.doorNo || '';
-  nameInput.value = state.name || '';
-  mobileInput.value = state.mobile || '';
-  updateFullAddressDisplay();
+      map.addListener('click', (e) => {
+        placeMarker(e.latLng);
+      });
 
-  // navigate: hide step1, show step2
-  step1.classList.add('hidden');
-  step2.style.display = 'block';
-  // ensure other pages are hidden
-  if (step3) step3.style.display = 'none';
-  if (step4) step4.style.display = 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+      marker.addListener('dragend', function(e) {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        state.lat = lat; state.lon = lng;
+        reverseGeocode(lat, lng);
+      });
 
-// Back button on step2 -> go to map (step1)
-backToMap.addEventListener('click', () => {
-  step2.style.display = 'none';
-  step1.classList.remove('hidden');
-  document.getElementById('search-input').focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+      // Autocomplete (Places)
+      const input = document.getElementById('pac-input');
+      autocomplete = new google.maps.places.Autocomplete(input, { fields: ["geometry","formatted_address","name"] });
+      autocomplete.bindTo('bounds', map);
 
-// Inputs update state (keep these)
-mobileInput.addEventListener('input', (e) => {
-  const v = e.target.value.replace(/\D/g,''); // digits only
-  e.target.value = v;
-  state.mobile = v;
-  if (/^\d{10}$/.test(v)) {
-    mobileValidIcon.style.display = 'flex';
-  } else {
-    mobileValidIcon.style.display = 'none';
-  }
-  updateFullAddressDisplay();
-});
-doorNoInput.addEventListener('input', (e) => { state.doorNo = e.target.value; updateFullAddressDisplay(); });
-nameInput.addEventListener('input', (e) => { state.name = e.target.value; updateFullAddressDisplay(); });
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.geometry) {
+          alert("No details available for the selected place.");
+          return;
+        }
+        const loc = place.geometry.location;
+        map.panTo(loc);
+        map.setZoom(17);
+        placeMarker(loc);
+      });
 
-// Confirm button: go to Payment page (Step 3) — replace the alert behavior with navigation
-confirmBtn.addEventListener('click', () => {
-  if (!state.name || state.name.trim().length < 2) {
-    alert('Please enter a valid name.');
-    nameInput.focus();
-    return;
-  }
-  if (!/^\d{10}$/.test(state.mobile)) {
-    alert('Please enter a valid 10-digit mobile number.');
-    mobileInput.focus();
-    return;
-  }
+      // initial reverse geocode for default center
+      state.lat = defaultCenter.lat; state.lon = defaultCenter.lng;
+      reverseGeocode(defaultCenter.lat, defaultCenter.lng);
+    }
 
-  // navigate: hide step2, show step3
-  step2.style.display = 'none';
-  step3.style.display = 'block';
+    function placeMarker(latLng) {
+      marker.setPosition(latLng);
+      map.panTo(latLng);
+      const lat = latLng.lat ? latLng.lat() : latLng.lat;
+      const lon = latLng.lng ? latLng.lng() : latLng.lng;
+      state.lat = lat;
+      state.lon = lon;
+      reverseGeocode(lat, lon);
+    }
 
-  // populate payment page price/qty if you have them
-  const qtyEl = document.getElementById('qty');
-  const priceEl = document.getElementById('item-price');
-  if (qtyEl) qtyEl.innerText = state.qty || 1;
-  if (priceEl) priceEl.innerText = `Rs. ${ (state.price || 999).toFixed(2) }`;
+    // use current location
+    document.getElementById('use-location').addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported by this browser.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        map.panTo({ lat, lng: lon });
+        map.setZoom(17);
+        placeMarker({ lat: () => lat, lng: () => lon });
+      }, (err) => {
+        alert('Could not get your location: ' + err.message);
+      }, { enableHighAccuracy:true, timeout:7000 });
+    });
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+    // Navigation between steps
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+      document.getElementById('success').classList.add('hidden');
+      if (n === 1) document.getElementById('step-1').classList.remove('hidden');
+      if (n === 2) document.getElementById('step-2').classList.remove('hidden');
+      if (n === 3) document.getElementById('step-3').classList.remove('hidden');
+      if (n === 'success') document.getElementById('success').classList.remove('hidden');
+    }
 
-// Payment option selection (delegated)
-document.getElementById('payment-options').addEventListener('click', (ev) => {
-  const opt = ev.target.closest('.option');
-  if (!opt) return;
-  // clear selected
-  document.querySelectorAll('#payment-options .option').forEach(o => o.classList.remove('selected'));
-  opt.classList.add('selected');
-  const id = opt.getAttribute('data-id');
-  state.selectedPayment = id;
-  // update price based on selection
-  if (id === 'dod') state.price = 899.00;
-  else if (id === 'cod') state.price = 1199.00;
-  else state.price = 999.00;
-  const priceEl = document.getElementById('item-price');
-  if (priceEl) priceEl.innerText = `Rs. ${ state.price.toFixed(2) }`;
-});
+    // Button events
+    document.getElementById('to-step-2').addEventListener('click', () => {
+      if (!state.lat || !state.lon) {
+        alert('Please select a location on the map first.');
+        return;
+      }
+      // populate door and name with defaults if present
+      document.getElementById('door').value = state.door || '';
+      document.getElementById('name').value = state.name || '';
+      document.getElementById('mobile').value = state.mobile || '';
+      showStep(2);
+      updateUI();
+    });
 
-// Back from step3 to step2
-document.getElementById('back-to-step2').addEventListener('click', () => {
-  step3.style.display = 'none';
-  step2.style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+    document.getElementById('back-to-1').addEventListener('click', () => showStep(1));
 
-// Pay Now -> show success (step4)
-document.getElementById('pay-now-btn').addEventListener('click', () => {
-  // (simulate payment) you can add a small loading spinner here
-  step3.style.display = 'none';
-  step4.style.display = 'block';
-  // Optionally show mockup image or order summary here
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('to-step-3').addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+      const door = document.getElementById('door').value.trim();
 
-  // debug log order
-  console.log('Order placed:', {
-    coords: state.coords, address: state.geocodedAddress, name: state.name,
-    mobile: state.mobile, doorNo: state.doorNo, payment: state.selectedPayment, price: state.price
-  });
-});
+      // mobile validation: 10 digits required
+      const mvalid = /^\d{10}$/.test(mobile);
+      if (!mvalid) {
+        document.getElementById('mobile-error').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('mobile-error').classList.add('hidden');
+      }
 
-// Place Another Order -> reset and go to step1
-document.getElementById('start-again-btn').addEventListener('click', () => {
-  // reset a few fields
-  state.doorNo = '';
-  state.name = '';
-  state.mobile = '';
-  state.selectedPayment = 'dod';
-  state.price = 999.00;
+      state.name = name;
+      state.mobile = mobile;
+      state.door = door;
 
-  // hide success, show map (step1)
-  step4.style.display = 'none';
-  step2.style.display = 'none';
-  step3.style.display = 'none';
-  step1.classList.remove('hidden');
+      // fill review
+      const fullAddress = buildFullAddress();
+      document.getElementById('review-name').innerText = state.name || '-';
+      document.getElementById('review-mobile').innerText = state.mobile || '-';
+      document.getElementById('review-address').innerText = fullAddress;
+      document.getElementById('review-coords-digipin').innerText = `${state.lat.toFixed(7)}, ${state.lon.toFixed(7)} — ${state.digipin}`;
 
-  // clear inputs
-  doorNoInput.value = '';
-  nameInput.value = '';
-  mobileInput.value = '';
-  mobileValidIcon.style.display = 'none';
-  updateFullAddressDisplay();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+      showStep(3);
+    });
 
-/* Utility: compose full address shown in step 2 (unchanged) */
-function updateFullAddressDisplay(){
-  let parts = [];
-  if (state.name) parts.push(state.name);
-  if (state.mobile) parts.push(state.mobile);
-  let addr = '';
-  if (state.doorNo) addr += state.doorNo + ', ';
-  addr += (state.geocodedAddress || '');
-  const full = (parts.length ? parts.join('\n') + '\n' : '') + addr;
-  fullAddressDisplay.innerText = full || '-';
-}
+    document.getElementById('back-to-2').addEventListener('click', () => showStep(2));
 
-  /*****************
-   *  Expose initMap to global (callback used in Google script)
-   *****************/
-  window.initMap = initMap;
-  
-  // Payment logic
-const payNowBtn = document.getElementById('pay-now-btn');
-const step3 = document.getElementById('step3');
-const step4 = document.getElementById('step4');
-const startAgainBtn = document.getElementById('start-again-btn');
+    document.getElementById('pay-now').addEventListener('click', () => {
+      // very light simulation of payment & confirmation
+      const chosen = document.querySelector('input[name="payment"]:checked');
+      if (!chosen) {
+        alert('Please choose a payment option.');
+        return;
+      }
+      // In real app send payload to server: state + chosen.value
+      // Show success
+      showStep('success');
+    });
 
-payNowBtn.addEventListener('click', () => {
-  step3.style.display = 'none';
-  step4.style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+    document.getElementById('start-over').addEventListener('click', () => {
+      // reset everything
+      state.lat = null; state.lon = null; state.address=''; state.digipin='';
+      state.door=''; state.name=''; state.mobile='';
+      document.getElementById('pac-input').value = '';
+      updateUI();
+      showStep(1);
+      // attempt to pan back to default
+      if (map) map.setCenter({ lat:17.50383899, lng:78.40651236 });
+    });
 
-startAgainBtn.addEventListener('click', () => {
-  step4.style.display = 'none';
-  document.getElementById('step2-panel').style.display = 'none';
-  step1.scrollIntoView({ behavior: 'smooth' });
-});
+    function buildFullAddress() {
+      let parts = [];
+      if (state.name) parts.push(state.name + ',');
+      if (state.mobile) parts.push(state.mobile + ',');
+      if (state.door) parts.push(state.door + ',');
+      if (state.address) parts.push(state.address);
+      return parts.join(' ').replace(/\s+,/g, ',');
+    }
 
-</script>
+    // Load Google Maps script dynamically and init
+    function loadGoogleMaps() {
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDN3L9gYsZpD2_BYRfElnPbRPVQb6sPufg&libraries=places&callback=initMap';
+      script.defer = true;
+      script.async = true;
+      window.initMap = initMap;
+      document.head.appendChild(script);
+    }
 
-<!-- Load Google Maps JS: replace YOUR_GOOGLE_MAPS_API_KEY with your key.
-     Keep &libraries=places so Places Autocomplete works. -->
-<script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=g&libraries=places&callback=initMap">
-</script>
+    // Init UI values and load maps
+    updateUI();
+    loadGoogleMaps();
 
+  </script>
 </body>
 </html>
