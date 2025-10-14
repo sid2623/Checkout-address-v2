@@ -140,6 +140,46 @@
     <button id="confirm-btn" class="btn" style="margin-top:6px;">Confirm & Continue</button>
   </div>
 </div>
+<!-- STEP 3: Payment -->
+<div id="step3" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
+  <h3 style="text-align:center;font-weight:600;font-size:16px;margin-bottom:10px;">Payment Options</h3>
+  <div style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-weight:700;">Debit on Delivery</div>
+        <div style="font-size:12px;color:#6b7280;">UPI mandate, charged only after delivery</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="color:#10b981;font-weight:700;">Rs. 899.00</div>
+        <div style="font-size:12px;color:#6b7280;">Save ₹100</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-id="upi" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+    <span style="font-weight:600;">UPI</span><span>Rs. 999.00</span>
+  </div>
+  <div class="option" data-id="card" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+    <span style="font-weight:600;">Cards</span><span>Rs. 999.00</span>
+  </div>
+  <div class="option" data-id="netbank" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+    <span style="font-weight:600;">Netbanking</span><span>Rs. 999.00</span>
+  </div>
+  <div class="option" data-id="cod" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+    <span style="font-weight:600;">COD <span style="font-weight:400;color:#6b7280;">+ ₹199 surcharge</span></span><span style="color:#ef4444;">Rs. 1199.00</span>
+  </div>
+
+  <button id="pay-now-btn" class="btn" style="margin-top:12px;">Pay Now →</button>
+</div>
+
+<!-- STEP 4: Success -->
+<div id="step4" style="display:none;text-align:center;padding:20px;">
+  <div style="font-size:40px;color:#10b981;">✓</div>
+  <h2 style="font-weight:700;margin:6px 0;">Payment Successful!</h2>
+  <p style="font-size:14px;color:#6b7280;">Your order has been placed.</p>
+  <button id="start-again-btn" class="btn" style="margin-top:12px;">Place Another Order</button>
+</div>
+
 </main>
 
 <!-- Google Maps JS (keep callback initMap) -->
@@ -367,7 +407,6 @@ nameInput.addEventListener('input', (e) => { state.name = e.target.value; update
 
 // Confirm button (proceed to payment or next step)
 confirmBtn.addEventListener('click', () => {
-  // Basic validation: name + 10-digit mobile recommended
   if (!state.name || state.name.trim().length < 2) {
     alert('Please enter a valid name.');
     nameInput.focus();
@@ -379,12 +418,11 @@ confirmBtn.addEventListener('click', () => {
     return;
   }
 
-  // Update any final state if needed
-  // For demo, we'll hide step2 and show success toast (you can route to payment)
   step2Panel.style.display = 'none';
-  alert('Details saved. You can now proceed to payment. (In your app, route to payment step)');
-  console.log('Checkout state:', state);
+  document.getElementById('step3').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
 
 // Utility: compose full address shown in step 2
 function updateFullAddressDisplay(){
@@ -402,6 +440,25 @@ function updateFullAddressDisplay(){
    *  Expose initMap to global (callback used in Google script)
    *****************/
   window.initMap = initMap;
+  
+  // Payment logic
+const payNowBtn = document.getElementById('pay-now-btn');
+const step3 = document.getElementById('step3');
+const step4 = document.getElementById('step4');
+const startAgainBtn = document.getElementById('start-again-btn');
+
+payNowBtn.addEventListener('click', () => {
+  step3.style.display = 'none';
+  step4.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+startAgainBtn.addEventListener('click', () => {
+  step4.style.display = 'none';
+  document.getElementById('step2-panel').style.display = 'none';
+  step1.scrollIntoView({ behavior: 'smooth' });
+});
+
 </script>
 
 <!-- Load Google Maps JS: replace YOUR_GOOGLE_MAPS_API_KEY with your key.
