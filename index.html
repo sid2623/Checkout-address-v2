@@ -55,7 +55,7 @@
     <h1>Add delivery address</h1>
   </header>
 
-  <div class="map-wrap">
+    <div id="step1" class="map-wrap">
     <!-- Search -->
     <div class="search-box">
       <input id="search-input" class="search-input" placeholder="Search for area, locality or building" type="text" />
@@ -101,7 +101,7 @@
     </div>
   </div>
   <!-- STEP 2: Confirm contact & door (hidden by default) -->
-<div id="step2-panel" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
+<div id="step2" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
     <div>
       <div style="font-size:13px; color:var(--muted);">Confirm delivery details</div>
@@ -141,43 +141,71 @@
   </div>
 </div>
 <!-- STEP 3: Payment -->
+<!-- STEP 3: Payment (separate page) -->
 <div id="step3" style="display:none; padding:14px; background:var(--card); border-top:1px solid #eef2f7;">
-  <h3 style="text-align:center;font-weight:600;font-size:16px;margin-bottom:10px;">Payment Options</h3>
-  <div style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:10px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-weight:700;">Debit on Delivery</div>
-        <div style="font-size:12px;color:#6b7280;">UPI mandate, charged only after delivery</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="color:#10b981;font-weight:700;">Rs. 899.00</div>
-        <div style="font-size:12px;color:#6b7280;">Save ₹100</div>
-      </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div>
+      <div class="muted">Order Details</div>
+      <div style="font-weight:700;font-size:14px;color:#111827;">Slides — Size: 9UK, Black</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="muted">Qty: <span id="qty">1</span></div>
+      <div id="item-price" style="font-weight:700;">Rs. 999.00</div>
     </div>
   </div>
 
-  <div class="option" data-id="upi" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-    <span style="font-weight:600;">UPI</span><span>Rs. 999.00</span>
-  </div>
-  <div class="option" data-id="card" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-    <span style="font-weight:600;">Cards</span><span>Rs. 999.00</span>
-  </div>
-  <div class="option" data-id="netbank" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-    <span style="font-weight:600;">Netbanking</span><span>Rs. 999.00</span>
-  </div>
-  <div class="option" data-id="cod" style="border:1px solid #e6eef6;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-    <span style="font-weight:600;">COD <span style="font-weight:400;color:#6b7280;">+ ₹199 surcharge</span></span><span style="color:#ef4444;">Rs. 1199.00</span>
+  <h3 style="text-align:center;font-weight:600;margin-bottom:10px;">Payment Options</h3>
+
+  <div id="payment-options">
+    <div class="option selected" data-id="dod" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-weight:700;">Debit on Delivery</div>
+        <div class="small-muted">One-time UPI mandate, charged only after delivery</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="color:#10b981;font-weight:700;">Rs. 899.00</div>
+        <div class="small-muted">Save ₹100</div>
+      </div>
+    </div>
+
+    <div class="option" data-id="upi" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;">UPI</span><span>Rs. 999.00</span>
+    </div>
+
+    <div class="option" data-id="card" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;">Cards</span><span>Rs. 999.00</span>
+    </div>
+
+    <div class="option" data-id="netbank" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;">Netbanking</span><span>Rs. 999.00</span>
+    </div>
+
+    <div class="option" data-id="cod" style="border:1px solid #e6eef6;padding:12px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:700;">COD <span style="font-weight:400;color:#6b7280;">+ ₹199 surcharge</span></span><span style="color:#ef4444;">Rs. 1199.00</span>
+    </div>
   </div>
 
-  <button id="pay-now-btn" class="btn" style="margin-top:12px;">Pay Now →</button>
+  <div style="margin-top:12px;">
+    <button id="pay-now-btn" class="btn">Pay Now →</button>
+  </div>
+
+  <div style="margin-top:10px;">
+    <button id="back-to-step2" style="background:none;border:none;color:#6b7280;font-weight:600;cursor:pointer;margin-top:8px;">Back to Address</button>
+  </div>
 </div>
 
-<!-- STEP 4: Success -->
+<!-- STEP 4: Success (separate page) -->
 <div id="step4" style="display:none;text-align:center;padding:20px;">
-  <div style="font-size:40px;color:#10b981;">✓</div>
-  <h2 style="font-weight:700;margin:6px 0;">Payment Successful!</h2>
-  <p style="font-size:14px;color:#6b7280;">Your order has been placed.</p>
-  <button id="start-again-btn" class="btn" style="margin-top:12px;">Place Another Order</button>
+  <div style="font-size:40px;color:#10b981;margin-bottom:6px;">✓</div>
+  <div style="font-weight:700;font-size:20px;margin-bottom:6px;">Payment Successful!</div>
+  <div class="small-muted" style="margin-bottom:12px;">Your order has been placed.</div>
+
+  <!-- If you want to show the mockup image here, you can insert an <img> tag -->
+  <!-- <img src="your-mockup.jpg" alt="mockup" style="max-width:320px;border-radius:12px;"> -->
+
+  <div style="margin-top:12px;">
+    <button id="start-again-btn" class="btn">Place Another Order</button>
+  </div>
 </div>
 
 </main>
@@ -347,7 +375,7 @@
    *  Navigation: Next button (example behavior)
    *****************/
  // Step 2 elements
-const step2Panel = document.getElementById('step2-panel');
+// Step 2 elements
 const confirmCoords = document.getElementById('confirm-coords');
 const doorNoInput = document.getElementById('door-no-input');
 const nameInput = document.getElementById('name-input');
@@ -358,37 +386,43 @@ const confirmBtn = document.getElementById('confirm-btn');
 const backToMap = document.getElementById('back-to-map');
 const nextBtn1 = document.getElementById('next-btn-1');
 
-// Show Step 2 when Next is clicked
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
+const step4 = document.getElementById('step4');
+
+
+// Show Step 2 when Next clicked (hide step1)
 nextBtn1.addEventListener('click', () => {
-  // Ensure coords and address are present
   if (!state.coords) {
     alert('Location not ready yet — please wait a moment and try again.');
     return;
   }
-
-  // Populate step2 fields
+  // populate values into step2
   confirmCoords.textContent = `${state.coords.lat.toFixed(6)}, ${state.coords.lng.toFixed(6)}`;
   doorNoInput.value = state.doorNo || '';
   nameInput.value = state.name || '';
   mobileInput.value = state.mobile || '';
   updateFullAddressDisplay();
 
-  // Toggle UI: hide map area and show step2
-  // We'll hide the main map container visually: (the map remains but panel overlays)
-  // If you prefer a full page switch, you can hide the map-wrap; this overlay is simpler.
-  step2Panel.style.display = 'block';
-  // Optional: scroll map out of view to focus on form
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  // navigate: hide step1, show step2
+  step1.classList.add('hidden');
+  step2.style.display = 'block';
+  // ensure other pages are hidden
+  if (step3) step3.style.display = 'none';
+  if (step4) step4.style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Back to map
+// Back button on step2 -> go to map (step1)
 backToMap.addEventListener('click', () => {
-  step2Panel.style.display = 'none';
-  // focus map search so user can continue
+  step2.style.display = 'none';
+  step1.classList.remove('hidden');
   document.getElementById('search-input').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Mobile validation and UI
+// Inputs update state (keep these)
 mobileInput.addEventListener('input', (e) => {
   const v = e.target.value.replace(/\D/g,''); // digits only
   e.target.value = v;
@@ -400,12 +434,10 @@ mobileInput.addEventListener('input', (e) => {
   }
   updateFullAddressDisplay();
 });
-
-// Door and name updates
 doorNoInput.addEventListener('input', (e) => { state.doorNo = e.target.value; updateFullAddressDisplay(); });
 nameInput.addEventListener('input', (e) => { state.name = e.target.value; updateFullAddressDisplay(); });
 
-// Confirm button (proceed to payment or next step)
+// Confirm button: go to Payment page (Step 3) — replace the alert behavior with navigation
 confirmBtn.addEventListener('click', () => {
   if (!state.name || state.name.trim().length < 2) {
     alert('Please enter a valid name.');
@@ -418,13 +450,83 @@ confirmBtn.addEventListener('click', () => {
     return;
   }
 
-  step2Panel.style.display = 'none';
-  document.getElementById('step3').style.display = 'block';
+  // navigate: hide step2, show step3
+  step2.style.display = 'none';
+  step3.style.display = 'block';
+
+  // populate payment page price/qty if you have them
+  const qtyEl = document.getElementById('qty');
+  const priceEl = document.getElementById('item-price');
+  if (qtyEl) qtyEl.innerText = state.qty || 1;
+  if (priceEl) priceEl.innerText = `Rs. ${ (state.price || 999).toFixed(2) }`;
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
+// Payment option selection (delegated)
+document.getElementById('payment-options').addEventListener('click', (ev) => {
+  const opt = ev.target.closest('.option');
+  if (!opt) return;
+  // clear selected
+  document.querySelectorAll('#payment-options .option').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+  const id = opt.getAttribute('data-id');
+  state.selectedPayment = id;
+  // update price based on selection
+  if (id === 'dod') state.price = 899.00;
+  else if (id === 'cod') state.price = 1199.00;
+  else state.price = 999.00;
+  const priceEl = document.getElementById('item-price');
+  if (priceEl) priceEl.innerText = `Rs. ${ state.price.toFixed(2) }`;
+});
 
-// Utility: compose full address shown in step 2
+// Back from step3 to step2
+document.getElementById('back-to-step2').addEventListener('click', () => {
+  step3.style.display = 'none';
+  step2.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Pay Now -> show success (step4)
+document.getElementById('pay-now-btn').addEventListener('click', () => {
+  // (simulate payment) you can add a small loading spinner here
+  step3.style.display = 'none';
+  step4.style.display = 'block';
+  // Optionally show mockup image or order summary here
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // debug log order
+  console.log('Order placed:', {
+    coords: state.coords, address: state.geocodedAddress, name: state.name,
+    mobile: state.mobile, doorNo: state.doorNo, payment: state.selectedPayment, price: state.price
+  });
+});
+
+// Place Another Order -> reset and go to step1
+document.getElementById('start-again-btn').addEventListener('click', () => {
+  // reset a few fields
+  state.doorNo = '';
+  state.name = '';
+  state.mobile = '';
+  state.selectedPayment = 'dod';
+  state.price = 999.00;
+
+  // hide success, show map (step1)
+  step4.style.display = 'none';
+  step2.style.display = 'none';
+  step3.style.display = 'none';
+  step1.classList.remove('hidden');
+
+  // clear inputs
+  doorNoInput.value = '';
+  nameInput.value = '';
+  mobileInput.value = '';
+  mobileValidIcon.style.display = 'none';
+  updateFullAddressDisplay();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* Utility: compose full address shown in step 2 (unchanged) */
 function updateFullAddressDisplay(){
   let parts = [];
   if (state.name) parts.push(state.name);
@@ -464,7 +566,7 @@ startAgainBtn.addEventListener('click', () => {
 <!-- Load Google Maps JS: replace YOUR_GOOGLE_MAPS_API_KEY with your key.
      Keep &libraries=places so Places Autocomplete works. -->
 <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN3L9gYsZpD2_BYRfElnPbRPVQb6sPufg&libraries=places&callback=initMap">
 </script>
 
 </body>
