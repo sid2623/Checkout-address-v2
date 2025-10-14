@@ -3,28 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mobile Checkout — DIGIPIN + Maps</title>
+  <title>Mobile Checkout — DIGIPIN + Maps (Buttons Visible)</title>
 
-  <!-- Tailwind for quick mobile-first styling -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* small local tweaks */
     html,body,#app { height:100%; }
     body { background:#f3f4f6; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    .phone-frame { max-width:420px; margin:18px auto; border-radius:26px; background:white; box-shadow: 0 18px 30px rgba(0,0,0,0.08); overflow:hidden; border:6px solid #2b132033; }
-    header { padding:18px 16px; text-align:center; font-weight:700; font-size:20px; }
-    .content { padding:12px 16px 28px 16px; min-height:560px; }
-    .card { background:white; border-radius:14px; padding:10px; border:1px solid #e6e7ea; box-shadow:0 2px 0 rgba(0,0,0,0.02); }
+    .phone-frame { max-width:420px; margin:18px auto; border-radius:26px; background:white; box-shadow: 0 18px 30px rgba(0,0,0,0.08); overflow:hidden; border:6px solid rgba(43,19,32,0.08); }
+    header { padding:16px 14px; text-align:center; font-weight:700; font-size:20px; }
+    .content { padding:12px 14px 88px 14px; min-height:560px; } /* bottom padding to allow sticky footer */
+    .card { background:white; border-radius:12px; padding:10px; border:1px solid #e6e7ea; box-shadow:0 2px 0 rgba(0,0,0,0.02); }
     .search-input { width:100%; height:44px; border-radius:10px; border:1px solid #d6d6d6; padding:8px 12px; background:#fff; }
-    #map { width:100%; height:320px; border-radius:12px; overflow:hidden; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border-radius:12px; font-weight:600; }
-    .primary { background: linear-gradient(90deg,#8ee12c,#56c25e); color:white; }
-    .muted { background:#f3f4f6; color:#222; border:1px solid #e2e2e2; }
+    #map { width:100%; height:240px; border-radius:12px; overflow:hidden; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border-radius:12px; font-weight:700; font-size:15px; }
+    .primary { background: linear-gradient(90deg,#34c759,#8ee12c); color:white; box-shadow: 0 6px 18px rgba(50,160,80,0.12); }
+    .muted { background:#fff; color:#222; border:1px solid #e2e2e2; }
     .field { display:block; width:100%; padding:12px; border-radius:12px; border:1px solid #d0d0d0; background:white; }
     .small { font-size:13px; color:#666; }
-    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#fff; border:1px solid #e6e6e6; }
+    .pill { display:inline-block; padding:8px 12px; border-radius:12px; background:#f7f7f8; border:1px solid #ececec; }
     .payment-option { display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:12px; border:1px solid #e6e6e6; background:white; margin-bottom:10px; }
+    .footer-sticky { position:fixed; left:50%; transform:translateX(-50%); bottom:18px; width:calc(100% - 64px); max-width:392px; z-index:50; }
+    .footer-inner { display:flex; gap:10px; }
+    .hidden { display:none !important; }
     .error { color:#c62828; font-size:13px; margin-top:6px; }
+    /* ensure long content scroll */
+    .step { max-height:calc(100vh - 170px); overflow:auto; padding-bottom:8px; }
   </style>
 </head>
 <body>
@@ -32,7 +36,7 @@
     <header>Add delivery address</header>
 
     <div class="content">
-      <!-- STEP containers -->
+      <!-- STEP 1 -->
       <div id="step-1" class="step card">
         <label class="small mb-2 block">Search address</label>
         <input id="pac-input" class="search-input mb-3" placeholder="Search place or address" type="text" />
@@ -48,13 +52,10 @@
           <div class="small text-gray-600 mt-2">Co-ords: <span id="coords" class="font-medium">—</span></div>
           <div class="mt-3 text-sm font-semibold" id="address-text">Address not available</div>
         </div>
-
-        <div class="mt-4">
-          <button id="to-step-2" class="btn primary w-full">Next (Add Door No. & Contact)</button>
-        </div>
       </div>
 
-      <div id="step-2" class="step hidden">
+      <!-- STEP 2 -->
+      <div id="step-2" class="step hidden card">
         <div class="mb-3">
           <label class="small">Co-ordinates</label>
           <div class="pill mt-1" id="coords-pill">—</div>
@@ -75,13 +76,9 @@
           <input id="mobile" class="field mt-1" placeholder="10 digit mobile" inputmode="numeric" />
           <div id="mobile-error" class="error hidden">Enter a valid 10 digit mobile number.</div>
         </div>
-
-        <div class="mt-4 flex gap-2">
-          <button id="back-to-1" class="btn muted w-1/2">Back</button>
-          <button id="to-step-3" class="btn primary w-1/2">Continue</button>
-        </div>
       </div>
 
+      <!-- STEP 3 -->
       <div id="step-3" class="step hidden">
         <div class="mb-3">
           <h3 class="text-lg font-bold">Order Details</h3>
@@ -117,24 +114,20 @@
             <label class="payment-option">
               <div>
                 <div class="font-semibold">Debit on Delivery</div>
-                <div class="small">One-time UPI mandate; amount debited after delivery</div>
+                <div class="small">One-time UPI mandate; debited after delivery</div>
               </div>
               <div>Rs. 899</div>
-              <input name="payment" type="radio" value="dod" class="ml-3" />
+              <input name="payment" type="radio" value="dod" />
             </label>
 
             <label class="payment-option">
-              <div>
-                <div class="font-semibold">UPI</div>
-              </div>
+              <div><div class="font-semibold">UPI</div></div>
               <div>Rs. 999</div>
               <input name="payment" type="radio" value="upi" />
             </label>
 
             <label class="payment-option">
-              <div>
-                <div class="font-semibold">Cards</div>
-              </div>
+              <div><div class="font-semibold">Cards</div></div>
               <div>Rs. 999</div>
               <input name="payment" type="radio" value="card" />
             </label>
@@ -149,109 +142,85 @@
             </label>
           </div>
         </div>
-
-        <div class="mt-4 flex gap-2">
-          <button id="back-to-2" class="btn muted w-1/2">Back</button>
-          <button id="pay-now" class="btn primary w-1/2">Pay Now</button>
-        </div>
       </div>
 
-      <div id="success" class="hidden text-center">
-        <div style="padding:26px;">
-          <div style="width:78px;height:78px;border-radius:999px;background:#eaf9ee;margin:12px auto;display:flex;align-items:center;justify-content:center;font-size:28px;color:#2a7f35;">✓</div>
+      <!-- SUCCESS -->
+      <div id="success" class="hidden text-center card">
+        <div style="padding:22px;">
+          <div style="width:68px;height:68px;border-radius:999px;background:#eaf9ee;margin:12px auto;display:flex;align-items:center;justify-content:center;font-size:28px;color:#2a7f35;">✓</div>
           <h2 class="font-bold text-xl">Order Confirmed</h2>
-          <p class="mt-2 text-sm text-gray-600">Your order has been placed successfully. Delivery partner will contact you.</p>
-          <div class="mt-6">
-            <button id="start-over" class="btn primary">Place New Order</button>
-          </div>
+          <p class="mt-2 text-sm text-gray-600">Your order has been placed successfully.</p>
         </div>
       </div>
 
     </div> <!-- content -->
+
+    <!-- Sticky footer with action buttons (always visible) -->
+    <div class="footer-sticky">
+      <div id="footer-1" class="footer-inner">
+        <button id="to-step-2" class="btn primary w-full">Next (Add Door No.)</button>
+      </div>
+
+      <div id="footer-2" class="footer-inner hidden">
+        <button id="back-to-1" class="btn muted w-1/2">Back</button>
+        <button id="to-step-3" class="btn primary w-1/2">Continue</button>
+      </div>
+
+      <div id="footer-3" class="footer-inner hidden">
+        <button id="back-to-2" class="btn muted w-1/2">Back</button>
+        <button id="pay-now" class="btn primary w-1/2">Pay Now</button>
+      </div>
+
+      <div id="footer-success" class="footer-inner hidden">
+        <button id="start-over" class="btn primary w-full">Place New Order</button>
+      </div>
+    </div>
+
   </div> <!-- frame -->
 
-  <!-- Google Maps JS will be loaded dynamically below.
-       Replace YOUR_GOOGLE_MAPS_API_KEY with an actual key that has Maps, Places, Geocoding enabled.
-  -->
   <script>
-    // --- Utilities / state ---
     let map, marker, geocoder, autocomplete;
-    const state = {
-      lat: null, lon: null, address: '', digipin: '', door:'', name:'', mobile:''
-    };
+    const state = { lat: null, lon: null, address: '', digipin: '', door:'', name:'', mobile:'' };
 
-    // DIGIPIN encoding - adapted/fixed version of your provided function.
     function Get_DIGIPIN(lat, lon) {
-      // L grid
-      const L = [
-        ['F', 'C', '9', '8'],
-        ['J', '3', '2', '7'],
-        ['K', '4', '5', '6'],
-        ['L', 'M', 'P', 'T']
-      ];
-
+      const L = [['F','C','9','8'],['J','3','2','7'],['K','4','5','6'],['L','M','P','T']];
       let vDIGIPIN = '';
-      let row = 0, column = 0;
-
-      // Bounding Box Extent (as in your original)
       let MinLat = 2.5, MaxLat = 38.50, MinLon = 63.50, MaxLon = 99.50;
       let LatDivBy = 4, LonDivBy = 4;
-
       if (lat < MinLat || lat > MaxLat || lon < MinLon || lon > MaxLon) {
-        // fallback: return a simplified code derived from lat/lon if out of range
-        const fixedLat = Math.abs(lat).toString().replace('.', '').slice(0,5);
-        const fixedLon = Math.abs(lon).toString().replace('.', '').slice(0,5);
+        const fixedLat = Math.abs(lat).toString().replace('.','').slice(0,5);
+        const fixedLon = Math.abs(lon).toString().replace('.','').slice(0,5);
         return `${fixedLat}-${fixedLon}`;
       }
-
-      for (let Lvl = 1; Lvl <= 10; Lvl++) {
+      for (let Lvl=1; Lvl<=10; Lvl++) {
         const LatDivDeg = (MaxLat - MinLat) / LatDivBy;
         const LonDivDeg = (MaxLon - MinLon) / LonDivBy;
-
-        // find row
         let NextLvlMaxLat = MaxLat;
         let NextLvlMinLat = MaxLat - LatDivDeg;
-        row = 0;
-        for (let x = 0; x < LatDivBy; x++) {
-          if (lat >= NextLvlMinLat && lat < NextLvlMaxLat) {
-            row = x;
-            break;
-          } else {
-            NextLvlMaxLat = NextLvlMinLat;
-            NextLvlMinLat = NextLvlMaxLat - LatDivDeg;
-          }
+        let row = 0;
+        for (let x=0; x<LatDivBy; x++){
+          if (lat >= NextLvlMinLat && lat < NextLvlMaxLat) { row = x; break; }
+          NextLvlMaxLat = NextLvlMinLat;
+          NextLvlMinLat = NextLvlMaxLat - LatDivDeg;
         }
-
-        // find column
         let NextLvlMinLon = MinLon;
         let NextLvlMaxLon = MinLon + LonDivDeg;
-        column = 0;
-        for (let x = 0; x < LonDivBy; x++) {
-          if (lon >= NextLvlMinLon && lon < NextLvlMaxLon) {
-            column = x;
-            break;
-          } else if ((NextLvlMinLon + LonDivDeg) < MaxLon) {
+        let column = 0;
+        for (let x=0; x<LonDivBy; x++){
+          if (lon >= NextLvlMinLon && lon < NextLvlMaxLon) { column = x; break; }
+          else if ((NextLvlMinLon + LonDivDeg) < MaxLon) {
             NextLvlMinLon = NextLvlMaxLon;
             NextLvlMaxLon = NextLvlMinLon + LonDivDeg;
-          } else {
-            column = x;
-          }
+          } else { column = x; }
         }
-
         vDIGIPIN += L[row][column];
-
-        if (Lvl === 3 || Lvl === 6) vDIGIPIN += "-";
-
-        // narrow bounding box for next level
-        MinLat = NextLvlMinLat;
-        MaxLat = NextLvlMaxLat;
-        MinLon = NextLvlMinLon;
-        MaxLon = NextLvlMaxLon;
+        if (Lvl === 3 || Lvl === 6) vDIGIPIN += '-';
+        MinLat = NextLvlMinLat; MaxLat = NextLvlMaxLat;
+        MinLon = NextLvlMinLon; MaxLon = NextLvlMaxLon;
       }
       return vDIGIPIN;
     }
 
-    // Helper to update UI values
     function updateUI() {
       document.getElementById('digipin').innerText = state.digipin || '—';
       document.getElementById('coords').innerText = (state.lat && state.lon) ? `${state.lat.toFixed(7)}, ${state.lon.toFixed(7)}` : '—';
@@ -259,179 +228,116 @@
       document.getElementById('address-text').innerText = state.address || 'Address not available';
     }
 
-    // Reverse geocode by lat/lng
     function reverseGeocode(lat, lon) {
       if (!geocoder) return;
-      const latlng = { lat: parseFloat(lat), lng: parseFloat(lon) };
-      geocoder.geocode({ location: latlng }, function(results, status) {
+      geocoder.geocode({ location: { lat: parseFloat(lat), lng: parseFloat(lon) } }, function(results, status) {
         if (status === 'OK' && results[0]) {
           state.address = results[0].formatted_address;
-          state.digipin = Get_DIGIPIN(lat, lon);
-          updateUI();
         } else {
           state.address = `Lat ${lat.toFixed(6)}, Lon ${lon.toFixed(6)}`;
-          state.digipin = Get_DIGIPIN(lat, lon);
-          updateUI();
-          console.warn('Geocoder failed: ', status);
         }
+        state.digipin = Get_DIGIPIN(lat, lon);
+        updateUI();
       });
     }
 
-    // Initialize map and autocomplete
     function initMap() {
-      const defaultCenter = { lat: 17.50383899, lng: 78.40651236 }; // Hyderabad-ish default
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: defaultCenter,
-        zoom: 15,
-        disableDefaultUI: true,
-        gestureHandling: 'greedy'
-      });
-
+      const defaultCenter = { lat: 17.50383899, lng: 78.40651236 };
+      map = new google.maps.Map(document.getElementById('map'), { center: defaultCenter, zoom:15, disableDefaultUI:true, gestureHandling:'greedy' });
       geocoder = new google.maps.Geocoder();
+      marker = new google.maps.Marker({ position: defaultCenter, map, draggable:true, title:'Drop pin where delivery should happen' });
 
-      marker = new google.maps.Marker({
-        position: defaultCenter,
-        map,
-        draggable: true,
-        title: 'Drop pin where delivery should happen'
+      map.addListener('click', (e) => placeMarker(e.latLng));
+      marker.addListener('dragend', (e) => {
+        const lat = e.latLng.lat(), lon = e.latLng.lng();
+        state.lat = lat; state.lon = lon; reverseGeocode(lat, lon);
       });
 
-      map.addListener('click', (e) => {
-        placeMarker(e.latLng);
-      });
-
-      marker.addListener('dragend', function(e) {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        state.lat = lat; state.lon = lng;
-        reverseGeocode(lat, lng);
-      });
-
-      // Autocomplete (Places)
       const input = document.getElementById('pac-input');
       autocomplete = new google.maps.places.Autocomplete(input, { fields: ["geometry","formatted_address","name"] });
       autocomplete.bindTo('bounds', map);
-
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (!place.geometry) {
-          alert("No details available for the selected place.");
-          return;
-        }
+        if (!place.geometry) { alert("No details available for the selected place."); return; }
         const loc = place.geometry.location;
-        map.panTo(loc);
-        map.setZoom(17);
-        placeMarker(loc);
+        map.panTo(loc); map.setZoom(17); placeMarker(loc);
       });
 
-      // initial reverse geocode for default center
       state.lat = defaultCenter.lat; state.lon = defaultCenter.lng;
       reverseGeocode(defaultCenter.lat, defaultCenter.lng);
     }
 
     function placeMarker(latLng) {
-      marker.setPosition(latLng);
-      map.panTo(latLng);
       const lat = latLng.lat ? latLng.lat() : latLng.lat;
       const lon = latLng.lng ? latLng.lng() : latLng.lng;
-      state.lat = lat;
-      state.lon = lon;
+      marker.setPosition(latLng);
+      map.panTo(latLng);
+      state.lat = lat; state.lon = lon;
       reverseGeocode(lat, lon);
     }
 
-    // use current location
     document.getElementById('use-location').addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        alert('Geolocation not supported by this browser.');
-        return;
-      }
+      if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
       navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        map.panTo({ lat, lng: lon });
-        map.setZoom(17);
+        const lat = pos.coords.latitude; const lon = pos.coords.longitude;
         placeMarker({ lat: () => lat, lng: () => lon });
-      }, (err) => {
-        alert('Could not get your location: ' + err.message);
-      }, { enableHighAccuracy:true, timeout:7000 });
+        map.setZoom(17);
+      }, (err) => alert('Could not get location: ' + err.message), { enableHighAccuracy:true, timeout:7000 });
     });
 
-    // Navigation between steps
     function showStep(n) {
-      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
       document.getElementById('success').classList.add('hidden');
-      if (n === 1) document.getElementById('step-1').classList.remove('hidden');
-      if (n === 2) document.getElementById('step-2').classList.remove('hidden');
-      if (n === 3) document.getElementById('step-3').classList.remove('hidden');
-      if (n === 'success') document.getElementById('success').classList.remove('hidden');
+      document.getElementById('footer-1').classList.add('hidden');
+      document.getElementById('footer-2').classList.add('hidden');
+      document.getElementById('footer-3').classList.add('hidden');
+      document.getElementById('footer-success').classList.add('hidden');
+      if (n === 1) { document.getElementById('step-1').classList.remove('hidden'); document.getElementById('footer-1').classList.remove('hidden'); }
+      if (n === 2) { document.getElementById('step-2').classList.remove('hidden'); document.getElementById('footer-2').classList.remove('hidden'); }
+      if (n === 3) { document.getElementById('step-3').classList.remove('hidden'); document.getElementById('footer-3').classList.remove('hidden'); }
+      if (n === 'success') { document.getElementById('success').classList.remove('hidden'); document.getElementById('footer-success').classList.remove('hidden'); }
+      // small scroll to top when switching
+      document.querySelector('.content').scrollTop = 0;
+      updateUI();
     }
 
-    // Button events
+    // button events
     document.getElementById('to-step-2').addEventListener('click', () => {
-      if (!state.lat || !state.lon) {
-        alert('Please select a location on the map first.');
-        return;
-      }
-      // populate door and name with defaults if present
+      if (!state.lat || !state.lon) { alert('Please select location on the map first.'); return; }
       document.getElementById('door').value = state.door || '';
       document.getElementById('name').value = state.name || '';
       document.getElementById('mobile').value = state.mobile || '';
       showStep(2);
-      updateUI();
     });
-
     document.getElementById('back-to-1').addEventListener('click', () => showStep(1));
-
     document.getElementById('to-step-3').addEventListener('click', () => {
       const name = document.getElementById('name').value.trim();
       const mobile = document.getElementById('mobile').value.trim();
       const door = document.getElementById('door').value.trim();
-
-      // mobile validation: 10 digits required
       const mvalid = /^\d{10}$/.test(mobile);
-      if (!mvalid) {
-        document.getElementById('mobile-error').classList.remove('hidden');
-        return;
-      } else {
-        document.getElementById('mobile-error').classList.add('hidden');
-      }
-
-      state.name = name;
-      state.mobile = mobile;
-      state.door = door;
-
-      // fill review
+      if (!mvalid) { document.getElementById('mobile-error').classList.remove('hidden'); return; }
+      document.getElementById('mobile-error').classList.add('hidden');
+      state.name = name; state.mobile = mobile; state.door = door;
       const fullAddress = buildFullAddress();
       document.getElementById('review-name').innerText = state.name || '-';
       document.getElementById('review-mobile').innerText = state.mobile || '-';
       document.getElementById('review-address').innerText = fullAddress;
       document.getElementById('review-coords-digipin').innerText = `${state.lat.toFixed(7)}, ${state.lon.toFixed(7)} — ${state.digipin}`;
-
       showStep(3);
     });
-
     document.getElementById('back-to-2').addEventListener('click', () => showStep(2));
-
     document.getElementById('pay-now').addEventListener('click', () => {
-      // very light simulation of payment & confirmation
       const chosen = document.querySelector('input[name="payment"]:checked');
-      if (!chosen) {
-        alert('Please choose a payment option.');
-        return;
-      }
-      // In real app send payload to server: state + chosen.value
-      // Show success
+      if (!chosen) { alert('Please choose a payment option.'); return; }
       showStep('success');
     });
-
     document.getElementById('start-over').addEventListener('click', () => {
-      // reset everything
-      state.lat = null; state.lon = null; state.address=''; state.digipin='';
-      state.door=''; state.name=''; state.mobile='';
+      state.lat = null; state.lon = null; state.address=''; state.digipin=''; state.door=''; state.name=''; state.mobile='';
       document.getElementById('pac-input').value = '';
       updateUI();
       showStep(1);
-      // attempt to pan back to default
       if (map) map.setCenter({ lat:17.50383899, lng:78.40651236 });
     });
 
@@ -444,20 +350,17 @@
       return parts.join(' ').replace(/\s+,/g, ',');
     }
 
-    // Load Google Maps script dynamically and init
     function loadGoogleMaps() {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap';
-      script.defer = true;
-      script.async = true;
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDN3L9gYsZpD2_BYRfElnPbRPVQb6sPufg&libraries=places&callback=initMap';
+      script.defer = true; script.async = true;
       window.initMap = initMap;
       document.head.appendChild(script);
     }
 
-    // Init UI values and load maps
     updateUI();
     loadGoogleMaps();
-
+    showStep(1);
   </script>
 </body>
 </html>
