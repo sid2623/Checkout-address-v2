@@ -1,432 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        /* Custom styles to match the design */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom button gradient */
-        .btn-gradient {
-            background: linear-gradient(to right, #a8e063, #56ab2f);
-            color: white;
-        }
-        .btn-gradient:hover {
-            background: linear-gradient(to right, #9dcf5c, #4e9a2a);
-        }
-        /* Hide scrollbar for the screen content */
-        .screen-content::-webkit-scrollbar {
-            display: none;
-        }
-        .screen-content {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Ensure the map and step containers take up appropriate height */
-        #step1, #step2, #step3, #step4 {
-            min-height: calc(100vh - 60px); /* Adjust based on header/footer height if any */
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout — DIGIPIN + Maps</title>
+
+  <!-- Tailwind CDN for quick styling (optional) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --primary: linear-gradient(90deg,#a8e063,#56ab2f);
+      --radius: 14px;
+    }
+    html,body { height:100%; background:var(--bg); font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; }
+    main { max-width:420px; margin:18px auto; background:var(--card); border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(16,24,40,0.08); min-height:88vh; display:flex; flex-direction:column; }
+    header { padding:14px 16px; border-bottom:1px solid #eef2f7; display:flex; align-items:center; gap:10px; }
+    header h1 { margin:0; font-size:15px; font-weight:500; color:#111827; letter-spacing:0.1px; }
+    /* Map area */
+    .map-wrap { position:relative; flex:1 1 auto; min-height:56vh; }
+    #map { position:absolute; inset:0; border-bottom:1px solid #eef2f7; }
+    .search-box { position:absolute; top:12px; left:12px; right:12px; display:flex; gap:8px; z-index:20; }
+    .search-input { flex:1; background:var(--card); border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.06); padding:10px 12px; border:1px solid #e6eef6; font-size:14px; color:#111827; }
+    .search-clear { width:40px; display:flex; align-items:center; justify-content:center; background:var(--card); border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); border:1px solid #e6eef6; font-size:16px; color:var(--muted); }
+    /* Center marker indicator (visual) */
+    .center-indicator { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:10; pointer-events:none; text-align:center; }
+    .center-indicator .pin { font-size:20px; color:#ef4444; transform:translateY(-6px); }
+    .center-indicator .hint { background:#0f172a; color:#fff; font-size:11px; padding:6px 10px; border-radius:10px; margin-bottom:6px; display:inline-block; opacity:0.95; }
+    /* Current location button bottom-right, non-overlapping */
+    .loc-btn { position:absolute; bottom:18px; right:12px; z-index:20; display:flex; align-items:center; gap:8px; background:var(--card); padding:8px 12px; border-radius:999px; box-shadow:0 8px 24px rgba(2,6,23,0.08); border:1px solid #eef2f7; font-size:13px; cursor:pointer; }
+    /* Address card */
+    .address-card { padding:14px; background:var(--card); border-top-left-radius:18px; border-top-right-radius:18px; border-top:1px solid #eef2f7; }
+    .address-row { display:flex; justify-content:space-between; gap:8px; align-items:center; font-size:13px; color: #111827; }
+    .muted { color:var(--muted); font-size:13px; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-weight:500; font-size:13px; color:#0f172a; }
+    .btn { width:100%; padding:12px 14px; border-radius:12px; border:none; font-weight:600; font-size:15px; cursor:pointer; background:var(--primary); color:white; box-shadow:0 8px 24px rgba(16,185,129,0.12); }
+    /* Responsive small tweaks */
+    @media (max-width:420px){
+      .search-input { font-size:13px; padding:9px 10px; }
+      .loc-btn { font-size:12px; padding:8px 10px; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
+<body>
 
-    <main class="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
-        <div id="checkout-container">
+<main>
+  <header>
+    <h1>Add delivery address</h1>
+  </header>
 
-            <!-- Step 1: Add Delivery Address -->
-            <div id="step1" class="flex flex-col">
-                <div class="p-4 border-b bg-white sticky top-0 z-20">
-                    <h1 class="text-xl font-semibold text-center">Add delivery address</h1>
-                </div>
-                <div class="relative flex-grow h-[calc(100vh-250px)]">
-                    <div class="absolute top-4 left-4 right-4 z-10 bg-white rounded-lg shadow-md flex items-center p-2">
-                         <i class="fa-solid fa-search text-gray-400 mx-2"></i>
-                        <input id="search-input" type="text" placeholder="Search" class="w-full outline-none">
-                        <button id="clear-search" class="text-gray-400 pr-2">&times;</button>
-                    </div>
-                    <div id="map" class="w-full h-full"></div>
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none">
-                        <div class="relative">
-                            <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-black text-white text-xs rounded-md py-1 px-3 whitespace-nowrap shadow-lg">
-                                Order will be delivered here
-                                <div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-black rotate-45"></div>
-                            </div>
-                            <i class="fa-solid fa-location-dot text-3xl text-red-500" style="transform: translateY(-15px);"></i>
-                        </div>
-                    </div>
-                    <button id="current-location-btn" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-white rounded-full shadow-md px-4 py-2 flex items-center text-sm font-medium">
-                        <i class="fa-solid fa-location-arrow mr-2"></i>
-                        Use Current Location
-                    </button>
-                </div>
-                <div id="address-details" class="bg-white p-4 rounded-t-2xl shadow-[0_-5px_15px_rgba(0,0,0,0.1)] sticky bottom-0">
-                     <div id="address-info-card" class="bg-white p-4 rounded-lg border">
-                        <p class="font-bold text-sm">DIGIPIN: <span id="digipin-display" class="font-mono">Fetching...</span></p>
-                        <p class="text-xs text-gray-600">Co-ords: <span id="coords-display">Fetching...</span></p>
-                        <p id="address-display" class="font-semibold mt-2">Fetching address...</p>
-                    </div>
-                    <button id="next-btn-1" class="w-full mt-4 p-4 rounded-xl text-lg font-bold btn-gradient transition-all duration-300 transform active:scale-95">
-                        Next (Add Door No.)
-                    </button>
-                </div>
-            </div>
+  <div class="map-wrap">
+    <!-- Search -->
+    <div class="search-box">
+      <input id="search-input" class="search-input" placeholder="Search for area, locality or building" type="text" />
+      <button id="clear-search" class="search-clear" aria-label="clear search">&times;</button>
+    </div>
 
-            <!-- Step 2: Contact Details -->
-            <div id="step2" class="hidden h-full bg-white flex flex-col p-6 space-y-4">
-                <h1 class="text-xl font-semibold text-center mb-4">Confirm Details</h1>
-                <div class="bg-gray-100 p-3 rounded-lg">
-                    <label class="text-xs text-gray-500">Co-ordinates:</label>
-                    <p id="confirm-coords" class="font-medium"></p>
-                </div>
-                 <div class="relative">
-                    <input id="door-no-input" type="text" placeholder=" " class="w-full p-3 border rounded-lg peer outline-none focus:border-green-500">
-                    <label class="absolute top-3 left-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1 peer-focus:text-green-500" style="transform: translateY(0);">Door No: (optional)</label>
-                </div>
-                 <div class="relative">
-                    <input id="name-input" type="text" placeholder=" " class="w-full p-3 border rounded-lg peer outline-none focus:border-green-500">
-                    <label class="absolute top-3 left-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1 peer-focus:text-green-500">Name</label>
-                </div>
-                 <div class="relative">
-                    <input id="mobile-input" type="tel" placeholder=" " class="w-full p-3 border rounded-lg peer outline-none focus:border-green-500">
-                     <label class="absolute top-3 left-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1 peer-focus:text-green-500">Mobile</label>
-                    <i id="mobile-valid-icon" class="fa-solid fa-check-circle text-green-500 absolute right-4 top-4 hidden"></i>
-                </div>
-                <div class="bg-gray-100 p-3 rounded-lg">
-                    <label class="text-xs text-gray-500">Your Full Address:</label>
-                    <p id="full-address-display" class="font-medium"></p>
-                </div>
-                 <div class="relative flex-grow">
-                    <textarea id="instructions-input" placeholder=" " class="w-full h-full p-3 border rounded-lg peer outline-none focus:border-green-500 resize-none"></textarea>
-                    <label class="absolute top-3 left-3 text-gray-500 pointer-events-none transition-all duration-200 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1 peer-focus:text-green-500">Instructions: (Optional)</label>
-                </div>
-                <button id="confirm-btn" class="w-full p-4 rounded-xl text-lg font-bold btn-gradient transition-all duration-300 transform active:scale-95 flex items-center justify-center">
-                    Confirm <i class="fa-solid fa-arrow-right ml-2"></i>
-                </button>
-            </div>
+    <!-- Map -->
+    <div id="map"></div>
 
-            <!-- Step 3: Payment -->
-            <div id="step3" class="hidden h-full flex flex-col screen-content overflow-y-auto">
-                <div class="bg-white p-4 sticky top-0">
-                    <div class="border rounded-lg p-4 flex items-center">
-                        <img src="https://placehold.co/60x60/a8e063/ffffff?text=Shoe" alt="Product Image" class="w-16 h-16 rounded-lg mr-4">
-                        <div class="flex-grow">
-                            <h2 class="font-bold">Slides</h2>
-                            <p class="text-sm text-gray-600">Size: 9UK, Black</p>
-                            <p class="font-bold text-lg">Rs. 999.00</p>
-                        </div>
-                        <div class="flex items-center border rounded-lg">
-                            <button class="px-3 py-1 text-lg">-</button>
-                            <span class="px-3 py-1">1</span>
-                            <button class="px-3 py-1 text-lg">+</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-4 flex-grow">
-                     <h3 class="font-semibold text-lg mb-4">Payment Options</h3>
-                    <div class="space-y-3">
-                        <div class="border-2 border-green-500 rounded-lg p-4 bg-green-50">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold">Debit on Delivery</h4>
-                                    <p class="text-xs text-gray-600">One time upi mandate, the amount will be debited only after delivery. <a href="#" class="text-blue-600 font-semibold">KNOW MORE</a></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-green-600">Rs. 899.00</p>
-                                    <p class="text-xs text-green-600 font-semibold">Save 100rs on this payment option</p>
-                                </div>
-                            </div>
-                        </div>
-                         <div class="border rounded-lg p-4 flex justify-between items-center">
-                            <h4 class="font-bold">UPI</h4>
-                            <p class="font-semibold">Rs. 999.00</p>
-                        </div>
-                        <div class="border rounded-lg p-4 flex justify-between items-center">
-                            <h4 class="font-bold">Cards</h4>
-                            <p class="font-semibold">Rs. 999.00</p>
-                        </div>
-                         <div class="border rounded-lg p-4 flex justify-between items-center">
-                            <h4 class="font-bold">Netbanking</h4>
-                            <p class="font-semibold">Rs. 999.00</p>
-                        </div>
-                         <div class="border rounded-lg p-4 flex justify-between items-center">
-                            <h4 class="font-bold">COD <span class="text-xs font-normal text-gray-500">+ 199rs Surcharge</span></h4>
-                            <p class="font-bold text-red-600">Rs. 1199.00</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-4 bg-white sticky bottom-0">
-                     <button id="pay-now-btn" class="w-full p-4 rounded-xl text-lg font-bold btn-gradient transition-all duration-300 transform active:scale-95 flex items-center justify-center">
-                        Pay Now <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-             <!-- Step 4: Success Message -->
-             <div id="step4" class="hidden h-full flex flex-col items-center justify-center bg-white p-6 text-center">
-                <i class="fa-solid fa-circle-check text-8xl text-green-500 mb-6"></i>
-                <h1 class="text-2xl font-bold mb-2">Payment Successful!</h1>
-                <p class="text-gray-600">Your order has been placed.</p>
-                <!--<button id="start-again-btn" class="mt-8 w-full p-4 rounded-xl text-lg font-bold btn-gradient">
-                    Place Another Order
-                </button>
-            </div>
-        </div>
-    </main>
+    <!-- Center indicator -->
+    <div class="center-indicator" aria-hidden="true">
+      <div class="hint">Order will be delivered here</div>
+      <div class="pin">📍</div>
+    </div>
 
-    <!-- Google Maps API Script -->
-    <script>
-        // --- State Management ---
-        const state = {
-            coords: null,
-            digipin: null,
-            geocodedAddress: null,
-            doorNo: '',
-            name: '',
-            mobile: ''
-        };
-        
-        // --- DOM Elements ---
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step3 = document.getElementById('step3');
-        const step4 = document.getElementById('step4');
-        
-        const digipinDisplay = document.getElementById('digipin-display');
-        const coordsDisplay = document.getElementById('coords-display');
-        const addressDisplay = document.getElementById('address-display');
+    <!-- Use current location button (bottom-right, non-overlapping) -->
+    <button id="current-location-btn" class="loc-btn" title="Use current device location">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+      Use current location
+    </button>
+  </div>
 
-        const confirmCoords = document.getElementById('confirm-coords');
-        const doorNoInput = document.getElementById('door-no-input');
-        const nameInput = document.getElementById('name-input');
-        const mobileInput = document.getElementById('mobile-input');
-        const mobileValidIcon = document.getElementById('mobile-valid-icon');
-        const fullAddressDisplay = document.getElementById('full-address-display');
-        
-        // --- DIGIPIN Generation Function ---
-        function getDigipin(lat, lon) {
-            const L = [
-                ['F', 'C', '9', '8'], ['J', '3', '2', '7'],
-                ['K', '4', '5', '6'], ['L', 'M', 'P', 'T']
-            ];
-            let vDIGIPIN = '';
-            let row = 0, column = 0;
-            let minLat = 2.5, maxLat = 38.50;
-            let minLon = 63.50, maxLon = 99.50;
-            const latDivBy = 4, lonDivBy = 4;
+  <!-- Address details -->
+  <div class="address-card">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="muted">DIGIPIN</div>
+        <div id="digipin-display" class="mono">Fetching...</div>
+      </div>
+      <div style="text-align:right">
+        <div class="muted">Co-ords</div>
+        <div id="coords-display" class="mono">Fetching...</div>
+      </div>
+    </div>
 
-            if (lat < minLat || lat > maxLat) {
-                console.error('Latitude Out of range'); return 'Out of Range';
-            }
-            if (lon < minLon || lon > maxLon) {
-                console.error('Longitude Out of range'); return 'Out of Range';
-            }
+    <div style="margin-top:10px;">
+      <div class="muted">Address</div>
+      <div id="address-display" style="margin-top:4px; font-size:14px; color:#111827; line-height:1.35;">Fetching address...</div>
+    </div>
 
-            for (let lvl = 1; lvl <= 10; lvl++) {
-                let latDivDeg = (maxLat - minLat) / latDivBy;
-                let lonDivDeg = (maxLon - minLon) / lonDivBy;
+    <div style="margin-top:12px;">
+      <button id="next-btn-1" class="btn">Next (Add Door No.)</button>
+    </div>
+  </div>
+</main>
 
-                // Find row
-                for (let i = 0; i < latDivBy; i++) {
-                    if (lat >= maxLat - (i + 1) * latDivDeg && lat < maxLat - i * latDivDeg) {
-                        row = i;
-                        break;
-                    }
-                }
-                 // Find column
-                for (let i = 0; i < lonDivBy; i++) {
-                     if (lon >= minLon + i * lonDivDeg && lon < minLon + (i + 1) * lonDivDeg) {
-                        column = i;
-                        break;
-                    }
-                }
+<!-- Google Maps JS (keep callback initMap) -->
+<script>
+  /*****************
+   *  STATE
+   *****************/
+  const state = {
+    coords: null,
+    digipin: null,
+    geocodedAddress: null
+  };
 
-                vDIGIPIN += L[row][column];
+  /*****************
+   *  DIGIPIN generation (your function, slightly cleaned)
+   *****************/
+  function getDigipin(lat, lon){
+    const L = [
+      ['F','C','9','8'], ['J','3','2','7'],
+      ['K','4','5','6'], ['L','M','P','T']
+    ];
+    let vDIGIPIN = '';
+    let row = 0, column = 0;
+    let minLat = 2.5, maxLat = 38.5;
+    let minLon = 63.5, maxLon = 99.5;
+    const latDivBy = 4, lonDivBy = 4;
 
-                if (lvl === 3 || lvl === 6) {
-                    vDIGIPIN += "-";
-                }
+    if (lat < minLat || lat > maxLat || lon < minLon || lon > maxLon) {
+      return 'Out of Range';
+    }
 
-                maxLat = maxLat - row * latDivDeg;
-                minLat = maxLat - latDivDeg;
-                minLon = minLon + column * lonDivDeg;
-                maxLon = minLon + lonDivDeg;
-            }
-            return vDIGIPIN;
+    for (let lvl = 1; lvl <= 10; lvl++){
+      const latDivDeg = (maxLat - minLat) / latDivBy;
+      const lonDivDeg = (maxLon - minLon) / lonDivBy;
+
+      for (let i=0;i<latDivBy;i++){
+        if (lat >= maxLat - (i+1)*latDivDeg && lat < maxLat - i*latDivDeg) { row = i; break; }
+      }
+      for (let i=0;i<lonDivBy;i++){
+        if (lon >= minLon + i*lonDivDeg && lon < minLon + (i+1)*lonDivDeg) { column = i; break; }
+      }
+
+      vDIGIPIN += L[row][column];
+
+      if (lvl === 3 || lvl === 6) vDIGIPIN += '-';
+
+      maxLat = maxLat - row * latDivDeg;
+      minLat = maxLat - latDivDeg;
+      minLon = minLon + column * lonDivDeg;
+      maxLon = minLon + lonDivDeg;
+    }
+    return vDIGIPIN;
+  }
+
+  /*****************
+   *  Map, Places, Geocoder (client)
+   *****************/
+  let map, geocoder, autocomplete;
+  const defaultPosition = { lat: 17.3850, lng: 78.4867 }; // Hyderabad
+
+  function initMap(){
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: defaultPosition,
+      zoom: 15,
+      disableDefaultUI: true,
+      gestureHandling: 'greedy'
+    });
+
+    geocoder = new google.maps.Geocoder();
+
+    setupSearchAutocomplete();
+    // Update details initially
+    updateLocationDetails(map.getCenter());
+
+    // When map center changes (pan/zoom), update after a tiny throttle
+    let t;
+    map.addListener('center_changed', () => {
+      clearTimeout(t);
+      t = setTimeout(() => { updateLocationDetails(map.getCenter()); }, 200);
+    });
+  }
+
+  // --- Places Autocomplete using the Maps JS library (client-side) ---
+  function setupSearchAutocomplete(){
+    const input = document.getElementById('search-input');
+    autocomplete = new google.maps.places.Autocomplete(input, { fields: ['geometry','formatted_address','name'] });
+    autocomplete.bindTo('bounds', map);
+
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (place.geometry && place.geometry.location){
+        map.panTo(place.geometry.location);
+        map.setZoom(17);
+        // updateLocationDetails will run from center_changed listener
+      }
+    });
+
+    document.getElementById('clear-search').addEventListener('click', () => {
+      input.value = '';
+    });
+  }
+
+  // --- Update UI after obtaining coordinates ---
+  function updateLocationDetails(latLng){
+    // latLng may be a LatLng object or a plain object
+    const lat = (typeof latLng.lat === 'function') ? latLng.lat() : latLng.lat;
+    const lng = (typeof latLng.lng === 'function') ? latLng.lng() : latLng.lng;
+
+    state.coords = { lat, lng };
+    document.getElementById('coords-display').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    document.getElementById('digipin-display').textContent = 'Generating...';
+    document.getElementById('address-display').textContent = 'Fetching address...';
+
+    // DIGIPIN
+    state.digipin = getDigipin(lat, lng);
+    document.getElementById('digipin-display').textContent = state.digipin;
+
+    // Client-side reverse geocode (fast, uses the Maps JS geocoder)
+    reverseGeocodeClient(lat, lng).then(address => {
+      state.geocodedAddress = address || 'No address found';
+      document.getElementById('address-display').textContent = state.geocodedAddress;
+    }).catch(err => {
+      state.geocodedAddress = 'Address unavailable';
+      document.getElementById('address-display').textContent = state.geocodedAddress;
+      console.error('Reverse geocode error (client):', err);
+    });
+  }
+
+  // Client-side geocoder using the Maps JS geocoder (no REST call)
+  function reverseGeocodeClient(lat, lng){
+    return new Promise((resolve, reject) => {
+      if (!geocoder) return reject('Geocoder not initialized');
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          resolve(results[0].formatted_address);
+        } else if (status === 'OK') {
+          resolve(null);
+        } else {
+          reject(status);
         }
-        
-        // --- Google Maps Initialization ---
-        let map, marker, geocoder, autocomplete;
-        const defaultPosition = { lat: 17.3850, lng: 78.4867 }; // Hyderabad
+      });
+    });
+  }
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: defaultPosition,
-                zoom: 15,
-                disableDefaultUI: true,
-                gestureHandling: 'greedy'
-            });
+  /*****************
+   *  Current location button
+   *  (keeps UI non-overlapping)
+   *****************/
+  document.getElementById('current-location-btn').addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert("Location not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+      const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      map.panTo(p);
+      map.setZoom(17);
+    }, err => {
+      console.error(err);
+      alert('Unable to retrieve your location.');
+    }, { enableHighAccuracy: true, timeout: 8000 });
+  });
 
-            geocoder = new google.maps.Geocoder();
-            
-            // --- Autocomplete Search Box ---
-            const searchInput = document.getElementById('search-input');
-            autocomplete = new google.maps.places.Autocomplete(searchInput);
-            autocomplete.bindTo('bounds', map);
-            autocomplete.setFields(['geometry', 'name']);
+  /*****************
+   *  Navigation: Next button (example behavior)
+   *****************/
+  document.getElementById('next-btn-1').addEventListener('click', () => {
+    // Example: console log state. In your app, move to the next step and populate fields.
+    console.log('Proceed with', state);
+    alert('Proceeding — check console for the state object (coords, digipin, address).');
+  });
 
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (place.geometry && place.geometry.location) {
-                    map.setCenter(place.geometry.location);
-                } else {
-                    console.log("Autocomplete's returned place contains no geometry");
-                }
-            });
+  /*****************
+   *  Expose initMap to global (callback used in Google script)
+   *****************/
+  window.initMap = initMap;
+</script>
 
-            // --- Map Event Listener ---
-            map.addListener('center_changed', () => {
-                 // A small delay to prevent firing too rapidly while panning
-                window.setTimeout(() => {
-                    updateLocationDetails(map.getCenter());
-                }, 200);
-            });
-            
-            // Initial load
-            updateLocationDetails(map.getCenter());
-        }
-
-        function updateLocationDetails(location) {
-            const lat = location.lat();
-            const lng = location.lng();
-            
-            state.coords = { lat, lng };
-
-            // Update displays with loading state
-            coordsDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            digipinDisplay.textContent = 'Generating...';
-            addressDisplay.textContent = 'Fetching address...';
-
-            // Generate DIGIPIN
-            state.digipin = getDigipin(lat, lng);
-            digipinDisplay.textContent = state.digipin;
-
-            // Reverse Geocode
-            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                if (status === 'OK') {
-                    if (results[0]) {
-                        state.geocodedAddress = results[0].formatted_address;
-                        addressDisplay.textContent = state.geocodedAddress;
-                    } else {
-                        addressDisplay.textContent = 'No address found.';
-                    }
-                } else {
-                    addressDisplay.textContent = 'Geocoder failed.';
-                    console.error('Geocoder failed due to: ' + status);
-                }
-            });
-        }
-        
-        // --- Event Listeners ---
-        document.getElementById('current-location-btn').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(position => {
-                    const pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    map.setCenter(pos);
-                }, () => {
-                    alert('Error: The Geolocation service failed.');
-                });
-            } else {
-                alert("Error: Your browser doesn't support geolocation.");
-            }
-        });
-        
-        document.getElementById('clear-search').addEventListener('click', () => {
-            document.getElementById('search-input').value = '';
-        });
-
-        // Step navigation
-        document.getElementById('next-btn-1').addEventListener('click', () => {
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
-            
-            // Populate Step 2 fields
-            confirmCoords.textContent = `${state.coords.lat.toFixed(6)}, ${state.coords.lng.toFixed(6)}`;
-            updateFullAddress();
-        });
-
-        document.getElementById('confirm-btn').addEventListener('click', () => {
-            step2.classList.add('hidden');
-            step3.classList.remove('hidden');
-        });
-        
-        document.getElementById('pay-now-btn').addEventListener('click', () => {
-            step3.classList.add('hidden');
-            step4.classList.remove('hidden');
-        });
-
-        document.getElementById('start-again-btn').addEventListener('click', () => {
-             // Reset state and inputs
-            state.doorNo = '';
-            state.name = '';
-            state.mobile = '';
-            doorNoInput.value = '';
-            nameInput.value = '';
-            mobileInput.value = '';
-            mobileValidIcon.classList.add('hidden');
-
-            step4.classList.add('hidden');
-            step1.classList.remove('hidden');
-            // Re-center map and update details for the default location
-            map.setCenter(defaultPosition);
-            updateLocationDetails(defaultPosition);
-        });
-        
-        // --- Step 2 Logic ---
-        function updateFullAddress() {
-            let fullAddress = '';
-            if (state.name) fullAddress += `${state.name}\n`;
-            if (state.mobile) fullAddress += `${state.mobile}\n`;
-            if (state.doorNo) fullAddress += `${state.doorNo}, `;
-            fullAddress += state.geocodedAddress || '';
-            fullAddressDisplay.innerText = fullAddress;
-        }
-
-        doorNoInput.addEventListener('input', (e) => {
-            state.doorNo = e.target.value;
-            updateFullAddress();
-        });
-        nameInput.addEventListener('input', (e) => {
-            state.name = e.target.value;
-            updateFullAddress();
-        });
-        mobileInput.addEventListener('input', (e) => {
-            state.mobile = e.target.value;
-            // Simple validation for 10 digits
-            if (/^\d{10}$/.test(state.mobile)) {
-                mobileValidIcon.classList.remove('hidden');
-            } else {
-                mobileValidIcon.classList.add('hidden');
-            }
-            updateFullAddress();
-        });
-
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap"></script>
+<!-- Load Google Maps JS: replace YOUR_GOOGLE_MAPS_API_KEY with your key.
+     Keep &libraries=places so Places Autocomplete works. -->
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN3L9gYsZpD2_BYRfElnPbRPVQb6sPufg&libraries=places&callback=initMap">
+</script>
 
 </body>
 </html>
-
