@@ -70,6 +70,15 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+        /* Fix touch responsiveness */
+        button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .touch-btn {
+            min-height: 44px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-full">
@@ -105,7 +114,7 @@
             </div>
 
             <!-- Current Location Button -->
-            <button id="currentLocationBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+            <button id="currentLocationBtn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 touch-btn">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -133,7 +142,7 @@
             </div>
 
             <!-- Next Button -->
-            <button id="nextBtn1" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed" disabled>
+            <button id="nextBtn1" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed touch-btn" disabled>
                 Continue to Details
             </button>
         </div>
@@ -145,7 +154,7 @@
             <div class="px-4 py-4">
                 <div class="flex items-center justify-between">
                     <h1 class="text-xl font-bold text-gray-900">Delivery Details</h1>
-                    <div class="text-sm text-gray-500">Step 2 of 4</div>
+                    <button id="editAddressBtn" class="text-sm text-blue-600 hover:text-blue-800 font-medium touch-btn">Edit Address</button>
                 </div>
             </div>
         </div>
@@ -201,7 +210,7 @@
             </div>
 
             <!-- Pay Now Button -->
-            <button id="payNowBtn" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed" disabled>
+            <button id="payNowBtn" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed touch-btn" disabled>
                 Proceed to Payment
             </button>
         </div>
@@ -213,7 +222,7 @@
             <div class="px-4 py-4">
                 <div class="flex items-center justify-between">
                     <h1 class="text-xl font-bold text-gray-900">Payment</h1>
-                    <div class="text-sm text-gray-500">Step 3 of 4</div>
+                    <button id="editDetailsBtn" class="text-sm text-blue-600 hover:text-blue-800 font-medium touch-btn">Edit Details</button>
                 </div>
             </div>
         </div>
@@ -250,6 +259,10 @@
                     <div><span class="text-gray-600">Name:</span> <span id="finalName" class="font-medium"></span></div>
                     <div><span class="text-gray-600">Mobile:</span> <span id="finalMobile" class="font-medium"></span></div>
                     <div><span class="text-gray-600">Address:</span> <span id="finalAddress" class="font-medium"></span></div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <span>DigiPIN: <span id="finalDigipin"></span></span> • 
+                        <span>Coords: <span id="finalCoords"></span></span>
+                    </div>
                 </div>
             </div>
 
@@ -258,7 +271,7 @@
                 <h3 class="font-medium text-gray-900">Choose Payment Method</h3>
                 
                 <!-- Debit on Pay -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="debit-on-pay" class="mr-3">
                     <div class="flex-1">
                         <div class="font-medium">Debit on Pay (Autopay)</div>
@@ -267,38 +280,38 @@
                 </label>
 
                 <!-- UPI -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="upi" class="mr-3">
                     <div class="font-medium">UPI</div>
                 </label>
 
                 <!-- Wallets -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="wallet" class="mr-3">
                     <div class="font-medium">Wallets</div>
                 </label>
 
                 <!-- Cards -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="card" class="mr-3">
                     <div class="font-medium">Credit/Debit Cards</div>
                 </label>
 
                 <!-- Net Banking -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="netbanking" class="mr-3">
                     <div class="font-medium">Net Banking</div>
                 </label>
 
                 <!-- COD -->
-                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 touch-btn">
                     <input type="radio" name="payment" value="cod" class="mr-3">
                     <div class="font-medium">Cash on Delivery</div>
                 </label>
             </div>
 
             <!-- Place Order Button -->
-            <button id="placeOrderBtn" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed" disabled>
+            <button id="placeOrderBtn" class="w-full bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-medium cursor-not-allowed touch-btn" disabled>
                 Place Order
             </button>
         </div>
@@ -339,7 +352,7 @@
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+            <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors touch-btn">
                 Place Another Order
             </button>
         </div>
@@ -497,9 +510,11 @@
                 
                 document.getElementById('addressText').textContent = currentAddress;
                 document.getElementById('locationInfo').classList.remove('hidden');
-                document.getElementById('nextBtn1').classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                document.getElementById('nextBtn1').classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
-                document.getElementById('nextBtn1').disabled = false;
+                
+                const nextBtn = document.getElementById('nextBtn1');
+                nextBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                nextBtn.classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
+                nextBtn.disabled = false;
             });
         }
 
@@ -559,14 +574,18 @@
                 document.getElementById('summaryAddress').textContent = fullAddress;
                 
                 document.getElementById('orderSummary').classList.remove('hidden');
-                document.getElementById('payNowBtn').classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                document.getElementById('payNowBtn').classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-                document.getElementById('payNowBtn').disabled = false;
+                
+                const payBtn = document.getElementById('payNowBtn');
+                payBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                payBtn.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                payBtn.disabled = false;
             } else {
                 document.getElementById('orderSummary').classList.add('hidden');
-                document.getElementById('payNowBtn').classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                document.getElementById('payNowBtn').classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
-                document.getElementById('payNowBtn').disabled = true;
+                
+                const payBtn = document.getElementById('payNowBtn');
+                payBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                payBtn.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                payBtn.disabled = true;
             }
         }
 
@@ -575,8 +594,13 @@
             initMap();
             
             // Page 1 events
-            document.getElementById('currentLocationBtn').addEventListener('click', getCurrentLocation);
-            document.getElementById('nextBtn1').addEventListener('click', function() {
+            document.getElementById('currentLocationBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                getCurrentLocation();
+            });
+            
+            document.getElementById('nextBtn1').addEventListener('click', function(e) {
+                e.preventDefault();
                 if (!this.disabled) {
                     document.getElementById('coordsDisplay').textContent = `${currentLat.toFixed(6)}, ${currentLon.toFixed(6)}`;
                     document.getElementById('digipinDisplay').textContent = currentDigipin;
@@ -585,29 +609,44 @@
             });
             
             // Page 2 events
+            document.getElementById('editAddressBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                showPage(1);
+            });
+            
             document.getElementById('fullName').addEventListener('input', validateUserDetails);
             document.getElementById('mobileNumber').addEventListener('input', validateUserDetails);
             document.getElementById('doorNumber').addEventListener('input', validateUserDetails);
             
-            document.getElementById('payNowBtn').addEventListener('click', function() {
+            document.getElementById('payNowBtn').addEventListener('click', function(e) {
+                e.preventDefault();
                 if (!this.disabled) {
                     document.getElementById('finalName').textContent = userData.name;
                     document.getElementById('finalMobile').textContent = userData.mobile;
                     document.getElementById('finalAddress').textContent = userData.fullAddress;
+                    document.getElementById('finalDigipin').textContent = currentDigipin;
+                    document.getElementById('finalCoords').textContent = `${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
                     showPage(3);
                 }
             });
             
             // Page 3 events
+            document.getElementById('editDetailsBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                showPage(2);
+            });
+            
             document.querySelectorAll('input[name="payment"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    document.getElementById('placeOrderBtn').classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
-                    document.getElementById('placeOrderBtn').classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
-                    document.getElementById('placeOrderBtn').disabled = false;
+                    const placeBtn = document.getElementById('placeOrderBtn');
+                    placeBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    placeBtn.classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
+                    placeBtn.disabled = false;
                 });
             });
             
-            document.getElementById('placeOrderBtn').addEventListener('click', function() {
+            document.getElementById('placeOrderBtn').addEventListener('click', function(e) {
+                e.preventDefault();
                 if (!this.disabled) {
                     const selectedPayment = document.querySelector('input[name="payment"]:checked');
                     if (selectedPayment) {
@@ -628,5 +667,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee1c7a2233c469',t:'MTc2MDUxODY3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee2c46d45e48e0',t:'MTc2MDUxOTMxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
