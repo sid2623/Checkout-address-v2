@@ -439,8 +439,11 @@
 
         // Initialize Google Map
         function initMap() {
+            // Default to Delhi if location access fails
+            const defaultLocation = { lat: 28.6139, lng: 77.2090 };
+            
             map = new google.maps.Map(document.getElementById('mapContainer'), {
-                center: { lat: 28.6139, lng: 77.2090 },
+                center: defaultLocation,
                 zoom: 13,
                 mapTypeControl: false,
                 streetViewControl: false,
@@ -451,6 +454,9 @@
                     position: google.maps.ControlPosition.RIGHT_BOTTOM
                 }
             });
+
+            // Immediately request user's current location
+            requestCurrentLocationOnLoad();
 
             // Initialize Places Autocomplete for search
             const searchInput = document.getElementById('searchInput');
@@ -518,7 +524,38 @@
             });
         }
 
-        // Get current location
+        // Request location on page load
+        function requestCurrentLocationOnLoad() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Set map to user's location
+                        map.setCenter({ lat, lng: lon });
+                        map.setZoom(16);
+                        updateLocation(lat, lon);
+                    },
+                    function(error) {
+                        // If location access is denied, just use default location
+                        console.log('Location access denied, using default location');
+                        // Map will stay at default Delhi location
+                        updateLocation(28.6139, 77.2090);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    }
+                );
+            } else {
+                // Geolocation not supported, use default
+                updateLocation(28.6139, 77.2090);
+            }
+        }
+
+        // Get current location (for button click)
         function getCurrentLocation() {
             const btn = document.getElementById('currentLocationBtn');
             btn.innerHTML = '<div class="loading">Getting location...</div>';
@@ -667,5 +704,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee2c46d45e48e0',t:'MTc2MDUxOTMxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ee5885620cc508',t:'MTc2MDUyMTEzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
